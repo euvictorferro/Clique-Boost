@@ -31,7 +31,17 @@ export async function POST(
   const client = readClients().find((c) => c.id === clientId);
   if (!client) return NextResponse.json({ error: "not found" }, { status: 404 });
 
-  const { content } = await req.json();
-  writeFileSync(icpPath(client.obsidianPath), content, "utf-8");
-  return NextResponse.json({ ok: true });
+  const body = await req.json();
+  const { content } = body;
+  if (typeof content !== "string") {
+    return NextResponse.json({ error: "content must be a string" }, { status: 400 });
+  }
+
+  try {
+    writeFileSync(icpPath(client.obsidianPath), content, "utf-8");
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Write failed";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
