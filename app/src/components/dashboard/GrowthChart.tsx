@@ -29,7 +29,14 @@ export function GrowthChart({ series }: GrowthChartProps) {
     new Set(series.flatMap((s) => s.data.map((d) => d.date)))
   ).sort();
 
-  const chartData = allDates.map((date) => {
+  const filteredDates =
+    period === "7d"
+      ? allDates.slice(-7)
+      : period === "30d"
+      ? allDates.slice(-30)
+      : allDates;
+
+  const chartData = filteredDates.map((date) => {
     const row: Record<string, string | number> = { date };
     series.forEach((s) => {
       const point = s.data.find((d) => d.date === date);
