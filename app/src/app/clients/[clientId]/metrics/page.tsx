@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { PlatformCards } from "@/components/client/PlatformCards";
+import { ExportButton } from "@/components/shared/ExportButton";
 import { MetricsKpis } from "@/components/client/MetricsKpis";
 import { GrowthToggleChart } from "@/components/client/GrowthToggleChart";
 import { TopPostsList } from "@/components/client/TopPostsList";
@@ -60,6 +61,14 @@ export default function MetricsPage({
 
   return (
     <div className="p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-base font-semibold text-[#111]">Métricas</h2>
+        <ExportButton
+          href={`/api/export/report/${clientId}`}
+          label="Exportar Relatório"
+          filename={`relatorio-${clientId}.pdf`}
+        />
+      </div>
       <PlatformCards selected={platform} onSelect={setPlatform} />
 
       {loading ? (
