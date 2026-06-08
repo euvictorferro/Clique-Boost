@@ -1,20 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { PaletteGrid } from "@/components/client/PaletteGrid";
 import { RefreshCw } from "lucide-react";
 
-export default function PalettePage({ params }: { params: { clientId: string } }) {
+export default function PalettePage({ params }: { params: Promise<{ clientId: string }> }) {
+  const { clientId } = use(params);
   const [markdown, setMarkdown] = useState("");
   const [selected, setSelected] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/clients/${params.clientId}/palette`)
+    fetch(`/api/clients/${clientId}/palette`)
       .then((r) => r.json())
       .then((d) => setMarkdown(d.content ?? ""))
       .finally(() => setLoading(false));
-  }, [params.clientId]);
+  }, [clientId]);
 
   const handleSelect = (index: number) => {
     setSelected(index);
@@ -29,7 +30,7 @@ export default function PalettePage({ params }: { params: { clientId: string } }
             fetch(`/api/pipeline/run`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ clientId: params.clientId, job: "palette" }),
+              body: JSON.stringify({ clientId: clientId, job: "palette" }),
             });
           }}
           className="flex items-center gap-1.5 text-xs px-3 py-1.5 border border-[#e5e5e5] rounded-lg text-[#555] hover:border-[#8b5cf6] hover:text-[#8b5cf6] transition-colors"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { TokenBadge } from "@/components/shared/TokenBadge";
 import { Save } from "lucide-react";
 
@@ -17,7 +17,8 @@ interface ClientData {
   metaTokenExpiresAt?: string;
 }
 
-export default function ClientSettingsPage({ params }: { params: { clientId: string } }) {
+export default function ClientSettingsPage({ params }: { params: Promise<{ clientId: string }> }) {
+  const { clientId } = use(params);
   const [client, setClient] = useState<ClientData | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -25,10 +26,10 @@ export default function ClientSettingsPage({ params }: { params: { clientId: str
     fetch(`/api/clients`)
       .then((r) => r.json())
       .then((clients: ClientData[]) => {
-        const found = clients.find((c) => c.id === params.clientId);
+        const found = clients.find((c) => c.id === clientId);
         if (found) setClient(found);
       });
-  }, [params.clientId]);
+  }, [clientId]);
 
   if (!client) return <div className="p-6 text-sm text-[#888]">Carregando…</div>;
 

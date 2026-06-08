@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { PlatformCards } from "@/components/client/PlatformCards";
 import { MetricsKpis } from "@/components/client/MetricsKpis";
 import { GrowthToggleChart } from "@/components/client/GrowthToggleChart";
@@ -33,20 +33,21 @@ const MOCK_GROWTH = Array.from({ length: 30 }, (_, d) => ({
 export default function MetricsPage({
   params,
 }: {
-  params: { clientId: string };
+  params: Promise<{ clientId: string }>;
 }) {
+  const { clientId } = use(params);
   const [platform, setPlatform] = useState("instagram");
   const [insights, setInsights] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/metrics/${params.clientId}`)
+    fetch(`/api/metrics/${clientId}`)
       .then((r) => r.json())
       .then((data) => {
         if (!data.error) setInsights(data);
       })
       .finally(() => setLoading(false));
-  }, [params.clientId]);
+  }, [clientId]);
 
   const followers = insights?.followers ?? 1681;
   const followerDelta = insights?.followerGrowth ?? 42;

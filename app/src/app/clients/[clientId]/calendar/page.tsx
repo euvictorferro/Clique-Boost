@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { CalendarView } from "@/components/client/CalendarView";
 import { RefreshCw } from "lucide-react";
 
-export default function CalendarPage({ params }: { params: { clientId: string } }) {
+export default function CalendarPage({ params }: { params: Promise<{ clientId: string }> }) {
+  const { clientId } = use(params);
   const currentMonth = new Date().toISOString().slice(0, 7);
   const [month, setMonth] = useState(currentMonth);
   const [data, setData] = useState<{ content: string; month: string } | null>(null);
@@ -12,11 +13,11 @@ export default function CalendarPage({ params }: { params: { clientId: string } 
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/clients/${params.clientId}/calendar?month=${month}`)
+    fetch(`/api/clients/${clientId}/calendar?month=${month}`)
       .then((r) => r.json())
       .then(setData)
       .finally(() => setLoading(false));
-  }, [params.clientId, month]);
+  }, [clientId, month]);
 
   return (
     <div className="p-6">
@@ -32,7 +33,7 @@ export default function CalendarPage({ params }: { params: { clientId: string } 
           <button
             className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-[#8b5cf6] text-white rounded-lg hover:bg-[#7c3aed] transition-colors"
             onClick={() => {
-              fetch(`/api/pipeline/run`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientId: params.clientId, job: "calendar" }) });
+              fetch(`/api/pipeline/run`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientId: clientId, job: "calendar" }) });
             }}
           >
             <RefreshCw size={12} />
