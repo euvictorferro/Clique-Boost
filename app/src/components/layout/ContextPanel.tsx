@@ -64,12 +64,13 @@ export function ContextPanel() {
           {isClientsSection ? "Clientes" : title}
         </span>
         {isClientsSection && (
-          <button
+          <Link
+            href="/clients/new"
             title="Novo cliente"
             className="w-5 h-5 flex items-center justify-center rounded text-[#888] hover:text-[#8b5cf6] hover:bg-[rgba(139,92,246,0.07)] transition-colors"
           >
             <Plus size={14} />
-          </button>
+          </Link>
         )}
       </div>
 
