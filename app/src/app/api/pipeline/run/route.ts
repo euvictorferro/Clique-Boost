@@ -31,8 +31,7 @@ export async function POST(req: NextRequest) {
       : `cd "${process.cwd()}/.." && npx tsx scripts/run-job.ts ${job}`;
 
     exec(cmd, (error, _stdout, stderr) => {
-      const { appendLog: log } = require("../../../../../../lib/pipelineLog");
-      log({
+      appendLog({
         date: new Date().toISOString(),
         job,
         clientId: clientId ?? "all",
