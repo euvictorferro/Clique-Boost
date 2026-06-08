@@ -1,0 +1,49 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { PaletteGrid } from "@/components/client/PaletteGrid";
+import { RefreshCw } from "lucide-react";
+
+export default function PalettePage({ params }: { params: { clientId: string } }) {
+  const [markdown, setMarkdown] = useState("");
+  const [selected, setSelected] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/clients/${params.clientId}/palette`)
+      .then((r) => r.json())
+      .then((d) => setMarkdown(d.content ?? ""))
+      .finally(() => setLoading(false));
+  }, [params.clientId]);
+
+  const handleSelect = (index: number) => {
+    setSelected(index);
+  };
+
+  return (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-base font-semibold text-[#111]">Paletas de Cores</h2>
+        <button
+          onClick={() => {
+            fetch(`/api/pipeline/run`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ clientId: params.clientId, job: "palette" }),
+            });
+          }}
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 border border-[#e5e5e5] rounded-lg text-[#555] hover:border-[#8b5cf6] hover:text-[#8b5cf6] transition-colors"
+        >
+          <RefreshCw size={12} />
+          Regenerar Paletas
+        </button>
+      </div>
+
+      {loading ? (
+        <p className="text-sm text-[#888]">Carregando paletas…</p>
+      ) : (
+        <PaletteGrid markdown={markdown} selectedIndex={selected} onSelect={handleSelect} />
+      )}
+    </div>
+  );
+}
