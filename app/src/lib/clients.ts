@@ -29,6 +29,14 @@ export function upsertClient(client: Client): void {
   saveClients(clients);
 }
 
+export function readClients(): Client[] {
+  return loadClients();
+}
+
+export function writeClients(clients: Client[]): void {
+  saveClients(clients);
+}
+
 export function slugify(name: string): string {
   return name
     .toLowerCase()
