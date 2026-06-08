@@ -1,0 +1,47 @@
+{
+  "name": "social-media-clique-boost",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "pipeline": "npx tsx scripts/run-pipeline.ts",
+    "weekly-refresh": "npx tsx scripts/weekly-refresh.ts",
+    "test-sheets": "npx tsx scripts/test-sheets.ts",
+    "test-onboarding": "npx tsx scripts/test-onboarding.ts",
+    "test-icp": "npx tsx scripts/test-icp.ts",
+    "test-palette": "npx tsx scripts/test-palette.ts",
+    "test-calendar": "npx tsx scripts/test-calendar.ts",
+    "test-meta": "npx tsx scripts/test-meta.ts",
+    "meta-auth": "npx tsx scripts/meta-auth.ts",
+    "meta-token": "npx tsx scripts/meta-token.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.3.1",
+    "google-auth-library": "^9.0.0",
+    "googleapis": "^144.0.0",
+    "lucide-react": "^0.577.0",
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "tailwind-merge": "^3.5.0",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "tailwindcss": "^4",
+    "tsx": "^4.19.0",
+    "typescript": "^5"
+  }
+}
