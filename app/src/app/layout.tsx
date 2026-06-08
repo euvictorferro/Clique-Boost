@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { ContextPanel } from "@/components/layout/ContextPanel";
+import { ToastProvider } from "@/components/shared/Toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,7 +24,9 @@ export default function RootLayout({
           <Sidebar />
           <ContextPanel />
           <main className="flex-1 overflow-y-auto bg-[#f5f5f5]">
-            {children}
+            <ToastProvider>
+              {children}
+            </ToastProvider>
           </main>
         </div>
       </body>
