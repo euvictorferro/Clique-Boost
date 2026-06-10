@@ -60,7 +60,7 @@ export default function SettingsPage() {
   if (loading) return <div className="p-6 text-sm text-[#888]">Carregando…</div>;
 
   return (
-    <div className="p-6 max-w-3xl">
+    <div className="p-6 ">
       <h1 className="text-lg font-semibold text-[#111] mb-6">Configurações Globais</h1>
 
       <h2 className="text-sm font-semibold text-[#888] uppercase tracking-wide mb-3">Tokens e APIs</h2>

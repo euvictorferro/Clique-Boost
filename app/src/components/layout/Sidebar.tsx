@@ -14,8 +14,6 @@ import {
 const NAV = [
   { href: "/", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/clients", icon: Users, label: "Clientes" },
-  { href: "/calendar", icon: Calendar, label: "Calendário" },
-  { href: "/insights", icon: BarChart2, label: "Insights" },
   { href: "/pipeline", icon: Workflow, label: "Pipeline" },
   { href: "/settings", icon: Settings, label: "Configurações" },
 ];

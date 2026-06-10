@@ -19,6 +19,7 @@ export interface Client {
   metaAccessToken?: string;
   createdAt: string;
   status: ClientStatus;
+  profilePictureUrl?: string;
 }
 
 export interface BriefingResponse {
@@ -106,7 +107,9 @@ export interface MetaInsights {
   followerGrowth: number;
   topPosts: MetaPost[];
   demographics?: MetaDemographics;
-  fetchedAt: string;
+  dailyFollowers?: Array<{ date: string; followers: number }>;
+  profilePictureUrl?: string;
+  fetchedAt?: string;
 }
 
 export interface InstagramPost {
@@ -132,4 +135,6 @@ export interface MetaPost {
   shares: number;
   reach: number;
   impressions: number;
+  caption?: string;
+  thumbnailUrl?: string;
 }

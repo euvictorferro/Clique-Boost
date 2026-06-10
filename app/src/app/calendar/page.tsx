@@ -7,7 +7,7 @@ export default function CalendarPage() {
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
 
   return (
-    <div className="p-6 max-w-5xl">
+    <div className="p-6 ">
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-lg font-semibold text-[#111]">Calendário Global</h1>
         <input

@@ -1,0 +1,182 @@
+[
+  {
+    "id": "1781051657923",
+    "date": "2026-06-10T00:34:17.923Z",
+    "job": "metrics",
+    "clientId": "tiago-zamboni",
+    "clientName": "Tiago Zamboni",
+    "status": "success",
+    "message": "Métricas coletadas com sucesso",
+    "durationMs": 6765,
+    "details": [
+      {
+        "label": "Seguidores",
+        "value": "1.683"
+      },
+      {
+        "label": "Crescimento",
+        "value": "0"
+      },
+      {
+        "label": "Alcance (30d)",
+        "value": "1.845"
+      },
+      {
+        "label": "Impressões (30d)",
+        "value": "3.713"
+      },
+      {
+        "label": "Engajamento",
+        "value": "0.00%"
+      },
+      {
+        "label": "Posts coletados",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": "1781051649746",
+    "date": "2026-06-10T00:34:09.746Z",
+    "job": "metrics",
+    "clientId": "isabela-castro",
+    "clientName": "Isabela Castro",
+    "status": "success",
+    "message": "Métricas coletadas com sucesso",
+    "durationMs": 8176,
+    "details": [
+      {
+        "label": "Seguidores",
+        "value": "6.134"
+      },
+      {
+        "label": "Crescimento",
+        "value": "0"
+      },
+      {
+        "label": "Alcance (30d)",
+        "value": "13.511"
+      },
+      {
+        "label": "Impressões (30d)",
+        "value": "35.171"
+      },
+      {
+        "label": "Engajamento",
+        "value": "0.70%"
+      },
+      {
+        "label": "Posts coletados",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "id": "1781051641048",
+    "date": "2026-06-10T00:34:01.048Z",
+    "job": "metrics",
+    "clientId": "sam-fernandes",
+    "clientName": "Sam Fernandes",
+    "status": "success",
+    "message": "Métricas coletadas com sucesso",
+    "durationMs": 8697,
+    "details": [
+      {
+        "label": "Seguidores",
+        "value": "1.891"
+      },
+      {
+        "label": "Crescimento",
+        "value": "0"
+      },
+      {
+        "label": "Alcance (30d)",
+        "value": "24.595"
+      },
+      {
+        "label": "Impressões (30d)",
+        "value": "34.563"
+      },
+      {
+        "label": "Engajamento",
+        "value": "1.07%"
+      },
+      {
+        "label": "Posts coletados",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "id": "1781051632001",
+    "date": "2026-06-10T00:33:52.001Z",
+    "job": "metrics",
+    "clientId": "victor-hugo-ferro",
+    "clientName": "Victor Hugo Ferro",
+    "status": "success",
+    "message": "Métricas coletadas com sucesso",
+    "durationMs": 9046,
+    "details": [
+      {
+        "label": "Seguidores",
+        "value": "600"
+      },
+      {
+        "label": "Crescimento",
+        "value": "0"
+      },
+      {
+        "label": "Alcance (30d)",
+        "value": "90"
+      },
+      {
+        "label": "Impressões (30d)",
+        "value": "226"
+      },
+      {
+        "label": "Engajamento",
+        "value": "0.58%"
+      },
+      {
+        "label": "Posts coletados",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "id": "1781051625207",
+    "date": "2026-06-10T00:33:45.206Z",
+    "job": "metrics",
+    "clientId": "lais-daltrozo",
+    "clientName": "Laís Daltrozo",
+    "status": "success",
+    "message": "Métricas coletadas com sucesso",
+    "durationMs": 6794,
+    "details": [
+      {
+        "label": "Seguidores",
+        "value": "1.683"
+      },
+      {
+        "label": "Crescimento",
+        "value": "0"
+      },
+      {
+        "label": "Alcance (30d)",
+        "value": "1.845"
+      },
+      {
+        "label": "Impressões (30d)",
+        "value": "3.713"
+      },
+      {
+        "label": "Engajamento",
+        "value": "0.00%"
+      },
+      {
+        "label": "Posts coletados",
+        "value": 0
+      }
+    ]
+  }
+]

@@ -6,6 +6,7 @@ interface MetricsKpisProps {
   reach30d: number;
   impressions30d: number;
   engagementRate: number;
+  periodLabel?: string;
 }
 
 export function MetricsKpis({
@@ -14,6 +15,7 @@ export function MetricsKpis({
   reach30d,
   impressions30d,
   engagementRate,
+  periodLabel = "30 dias",
 }: MetricsKpisProps) {
   return (
     <div className="grid grid-cols-4 gap-4 mb-5">
@@ -21,10 +23,10 @@ export function MetricsKpis({
         label="Seguidores"
         value={followers.toLocaleString("pt-BR")}
         delta={followerDelta}
-        deltaLabel="30d"
+        deltaLabel={periodLabel}
       />
-      <KpiCard label="Alcance 30d" value={reach30d.toLocaleString("pt-BR")} />
-      <KpiCard label="Impressões 30d" value={impressions30d.toLocaleString("pt-BR")} />
+      <KpiCard label={`Alcance (${periodLabel})`} value={reach30d.toLocaleString("pt-BR")} />
+      <KpiCard label={`Impressões (${periodLabel})`} value={impressions30d.toLocaleString("pt-BR")} />
       <KpiCard label="Engajamento" value={`${engagementRate.toFixed(2)}%`} />
     </div>
   );

@@ -62,7 +62,7 @@ export default function InsightsPage() {
     }));
 
   return (
-    <div className="p-6 max-w-5xl">
+    <div className="p-6 ">
       <h1 className="text-lg font-semibold text-[#111] mb-5">Insights Comparativo</h1>
 
       <div className="mb-5">

@@ -8,28 +8,12 @@ import { GrowthToggleChart } from "@/components/client/GrowthToggleChart";
 import { TopPostsList } from "@/components/client/TopPostsList";
 import { Demographics } from "@/components/client/Demographics";
 
-const MOCK_DEMOGRAPHICS = {
-  ageRanges: [
-    { range: "18-24", percentage: 22 },
-    { range: "25-34", percentage: 38 },
-    { range: "35-44", percentage: 24 },
-    { range: "45-54", percentage: 11 },
-    { range: "55+", percentage: 5 },
-  ],
-  topCities: [
-    { city: "São Paulo", percentage: 34 },
-    { city: "Rio de Janeiro", percentage: 18 },
-    { city: "Curitiba", percentage: 12 },
-    { city: "Belo Horizonte", percentage: 9 },
-    { city: "Florianópolis", percentage: 7 },
-  ],
-  genderSplit: { female: 62, male: 35, unknown: 3 },
-};
+type Period = "7" | "30";
 
-const MOCK_GROWTH = Array.from({ length: 30 }, (_, d) => ({
-  date: new Date(Date.now() - (29 - d) * 86400000).toISOString().slice(5, 10),
-  followers: 1600 + Math.round(d * 2.7),
-}));
+const PERIOD_LABELS: Record<Period, string> = {
+  "7": "7 dias",
+  "30": "30 dias",
+};
 
 export default function MetricsPage({
   params,
@@ -38,53 +22,110 @@ export default function MetricsPage({
 }) {
   const { clientId } = use(params);
   const [platform, setPlatform] = useState("instagram");
+  const [period, setPeriod] = useState<Period>("30");
   const [insights, setInsights] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/metrics/${clientId}`)
+    setLoading(true);
+    setError(null);
+    fetch(`/api/metrics/${clientId}?period=${period}`)
       .then((r) => r.json())
       .then((data) => {
-        if (!data.error) setInsights(data);
+        if (data.error) setError(data.error);
+        else setInsights(data);
       })
+      .catch(() => setError("Erro ao carregar métricas"))
       .finally(() => setLoading(false));
-  }, [clientId]);
+  }, [clientId, period]);
 
-  const followers = insights?.followers ?? 1681;
-  const followerDelta = insights?.followerGrowth ?? 42;
-  const reach30d = insights?.reach ?? 3200;
-  const impressions30d = insights?.impressions ?? 8400;
-  const engagementRate = insights?.engagementRate ?? 4.2;
-  const topPosts = insights?.topPosts ?? [];
-  const demographics = insights?.demographics ?? MOCK_DEMOGRAPHICS;
-  const growthData = MOCK_GROWTH;
+  const followers = insights?.followerCount ?? 0;
+  const followerDelta = insights?.followerGrowth ?? 0;
+  const reach = insights?.reach ?? 0;
+  const impressions = insights?.impressions ?? 0;
+  const engagementRate = insights?.engagementRate ?? 0;
+
+  const topPosts = (insights?.topPosts ?? []).map((p: any) => ({
+    id: p.id,
+    mediaType: p.mediaType ?? "IMAGE",
+    caption: p.caption ?? "",
+    likes: p.likeCount ?? 0,
+    comments: p.commentsCount ?? 0,
+    saves: p.saves ?? 0,
+    permalink: p.permalink,
+    thumbnailUrl: p.thumbnailUrl ?? "",
+  }));
+
+  const demographics = insights?.demographics;
+
+  const growthData: Array<{ date: string; followers: number }> =
+    insights?.dailyFollowers?.length > 0
+      ? insights.dailyFollowers
+      : Array.from({ length: Number(period) }, (_, d) => ({
+          date: new Date(Date.now() - (Number(period) - 1 - d) * 86400000)
+            .toISOString()
+            .slice(5, 10),
+          followers,
+        }));
 
   return (
-    <div className="p-6">
+    <div className="p-6 w-full">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-base font-semibold text-[#111]">Métricas</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-base font-semibold text-[#111]">Métricas</h2>
+          {/* Filtro de período — controla TUDO na página */}
+          <div className="flex gap-1">
+            {(["7", "30"] as Period[]).map((p) => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={`px-2.5 py-1 text-xs rounded-md font-medium transition-colors ${
+                  period === p
+                    ? "bg-[#8b5cf6] text-white"
+                    : "bg-[#f5f5f5] text-[#888] hover:text-[#111]"
+                }`}
+              >
+                {PERIOD_LABELS[p]}
+              </button>
+            ))}
+          </div>
+        </div>
         <ExportButton
           href={`/api/export/report/${clientId}`}
           label="Exportar Relatório"
           filename={`relatorio-${clientId}.pdf`}
         />
       </div>
+
       <PlatformCards selected={platform} onSelect={setPlatform} />
 
-      {loading ? (
-        <div className="text-sm text-[#888] py-4">Carregando métricas…</div>
-      ) : (
+      {loading && (
+        <div className="flex items-center gap-2 text-sm text-[#888] py-8">
+          <div className="w-4 h-4 border-2 border-[#8b5cf6] border-t-transparent rounded-full animate-spin" />
+          Carregando métricas dos últimos {PERIOD_LABELS[period]}…
+        </div>
+      )}
+
+      {error && !loading && (
+        <div className="text-sm text-[#e11d48] bg-[#fee2e2] px-4 py-3 rounded-lg mb-4">
+          {error}
+        </div>
+      )}
+
+      {!loading && !error && (
         <>
           <MetricsKpis
             followers={followers}
             followerDelta={followerDelta}
-            reach30d={reach30d}
-            impressions30d={impressions30d}
+            reach30d={reach}
+            impressions30d={impressions}
             engagementRate={engagementRate}
+            periodLabel={PERIOD_LABELS[period]}
           />
-          <GrowthToggleChart data30d={growthData} />
-          <TopPostsList posts={topPosts} />
-          <Demographics demographics={demographics} />
+          <GrowthToggleChart data={growthData} />
+          <TopPostsList posts={topPosts} periodLabel={PERIOD_LABELS[period]} />
+          {demographics && <Demographics demographics={demographics} />}
         </>
       )}
     </div>

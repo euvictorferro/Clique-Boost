@@ -9,13 +9,8 @@ interface Client {
   id: string;
   name: string;
   niche: string;
+  profilePictureUrl?: string;
 }
-
-const NICHE_LABELS: Record<string, string> = {
-  "life-insurance": "Life Insurance",
-  "real-estate": "Imóveis",
-  general: "Geral",
-};
 
 const AVATAR_COLORS = [
   "#8b5cf6", "#06b6d4", "#f59e0b", "#10b981", "#f43f5e",
@@ -39,12 +34,6 @@ export function ContextPanel() {
       .catch(() => {});
   }, []);
 
-  const byNiche = clients.reduce<Record<string, Client[]>>((acc, c) => {
-    const key = c.niche ?? "general";
-    acc[key] = [...(acc[key] ?? []), c];
-    return acc;
-  }, {});
-
   const sectionTitle = () => {
     if (pathname === "/") return "Dashboard";
     if (isClientsSection) return null;
@@ -56,6 +45,9 @@ export function ContextPanel() {
   };
 
   const title = sectionTitle();
+
+  // Fora da seção de clientes, o painel não tem utilidade — esconde
+  if (!isClientsSection) return null;
 
   return (
     <div className="w-[200px] h-screen border-r border-[#e5e5e5] bg-white flex flex-col shrink-0">
@@ -76,43 +68,44 @@ export function ContextPanel() {
 
       {isClientsSection && (
         <div className="flex-1 overflow-y-auto px-2 pb-4">
-          {Object.entries(byNiche).map(([niche, list]) => (
-            <div key={niche} className="mb-3">
-              <p className="text-[10px] font-semibold text-[#aaa] uppercase tracking-wide px-1 mb-1">
-                {NICHE_LABELS[niche] ?? niche}
-              </p>
-              {list.map((c) => {
-                const active = pathname.startsWith(`/clients/${c.id}`);
-                const initial = c.name.charAt(0).toUpperCase();
-                const bg = avatarColor(c.name);
-                return (
-                  <Link
-                    key={c.id}
-                    href={`/clients/${c.id}/metrics`}
-                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg mb-0.5 transition-colors ${
-                      active
-                        ? "bg-[rgba(139,92,246,0.07)] border border-[rgba(139,92,246,0.2)]"
-                        : "hover:bg-[#f5f5f5]"
-                    }`}
+          {clients.map((c) => {
+            const active = pathname.startsWith(`/clients/${c.id}`);
+            const initial = c.name.charAt(0).toUpperCase();
+            const bg = avatarColor(c.name);
+            return (
+              <Link
+                key={c.id}
+                href={`/clients/${c.id}/metrics`}
+                className={`flex items-center gap-2 px-2 py-1.5 rounded-lg mb-0.5 transition-colors ${
+                  active
+                    ? "bg-[rgba(139,92,246,0.07)] border border-[rgba(139,92,246,0.2)]"
+                    : "hover:bg-[#f5f5f5]"
+                }`}
+              >
+                {c.profilePictureUrl ? (
+                  <img
+                    src={c.profilePictureUrl}
+                    alt={c.name}
+                    className="w-6 h-6 rounded-full object-cover shrink-0 border border-[#e5e5e5]"
+                  />
+                ) : (
+                  <span
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
+                    style={{ background: bg }}
                   >
-                    <span
-                      className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
-                      style={{ background: bg }}
-                    >
-                      {initial}
-                    </span>
-                    <span
-                      className={`text-xs truncate ${
-                        active ? "text-[#8b5cf6] font-medium" : "text-[#333]"
-                      }`}
-                    >
-                      {c.name}
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
+                    {initial}
+                  </span>
+                )}
+                <span
+                  className={`text-xs truncate ${
+                    active ? "text-[#8b5cf6] font-medium" : "text-[#333]"
+                  }`}
+                >
+                  {c.name}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

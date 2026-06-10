@@ -1,4 +1,5 @@
 import { Client, MetaDemographics, MetaInsights, MetaPost } from "./types";
+import { upsertClient } from "./clients";
 
 const GRAPH = "https://graph.facebook.com/v19.0";
 
@@ -126,22 +127,22 @@ async function fetchFollowerGrowth(igId: string, pageToken: string, since: numbe
   }
 }
 
-export async function fetchClientInsights(client: Client): Promise<MetaInsights> {
+export async function fetchClientInsights(client: Client, days = 30): Promise<MetaInsights> {
   const token = client.metaAccessToken;
   if (!token) throw new Error(`Cliente ${client.name} não tem metaAccessToken configurado`);
 
-  console.log(`📊 Buscando métricas Meta para ${client.name}...`);
+  console.log(`📊 Buscando métricas Meta para ${client.name} (${days}d)...`);
 
   const { igId, pageToken } = await getIgAccountId(token, client.instagramHandle);
   console.log(`📷 Instagram Business Account: ${igId}`);
 
-  const since = Math.floor((Date.now() - 30 * 24 * 60 * 60 * 1000) / 1000);
+  const since = Math.floor((Date.now() - days * 24 * 60 * 60 * 1000) / 1000);
   const until = Math.floor(Date.now() / 1000);
 
   const profile = await graphFetch(
-    `/${igId}?fields=followers_count,media_count,name,username`,
+    `/${igId}?fields=followers_count,media_count,name,username,profile_picture_url`,
     pageToken
-  ) as { followers_count?: number; media_count?: number; name?: string; username?: string };
+  ) as { followers_count?: number; media_count?: number; name?: string; username?: string; profile_picture_url?: string };
 
   let totalReach = 0;
   let totalImpressions = 0;
@@ -161,18 +162,25 @@ export async function fetchClientInsights(client: Client): Promise<MetaInsights>
     console.warn("⚠️  Insights de alcance não disponíveis:", (err as Error).message);
   }
 
-  // Posts com saves e shares (saved = saves, shares retorna objeto {count})
+  // Posts com saves, shares, thumbnail e caption (limit proporcional ao período)
+  const mediaLimit = days <= 7 ? 10 : days <= 30 ? 20 : 50;
   const mediaData = await graphFetch(
-    `/${igId}/media?fields=id,permalink,media_type,timestamp,like_count,comments_count,saved,shares&limit=20`,
+    `/${igId}/media?fields=id,permalink,media_type,timestamp,like_count,comments_count,saved,shares,caption,media_url,thumbnail_url&limit=${mediaLimit}`,
     pageToken
   ) as { data?: Array<{
     id: string; permalink: string; media_type: string; timestamp: string;
     like_count: number; comments_count: number;
     saved?: number;
     shares?: { count: number };
+    caption?: string;
+    media_url?: string;
+    thumbnail_url?: string;
   }> };
 
+  // Filtra apenas posts dentro do período selecionado
+  const sinceDate = new Date(since * 1000);
   const topPosts: MetaPost[] = (mediaData.data ?? [])
+    .filter((p) => new Date(p.timestamp) >= sinceDate)
     .sort((a, b) => (b.like_count + b.comments_count) - (a.like_count + a.comments_count))
     .slice(0, 5)
     .map((p) => ({
@@ -186,6 +194,8 @@ export async function fetchClientInsights(client: Client): Promise<MetaInsights>
       shares: p.shares?.count ?? 0,
       reach: 0,
       impressions: 0,
+      caption: p.caption ?? "",
+      thumbnailUrl: p.thumbnail_url ?? p.media_url ?? "",
     }));
 
   const followerCount = profile.followers_count ?? 0;
@@ -195,6 +205,31 @@ export async function fetchClientInsights(client: Client): Promise<MetaInsights>
   const engagementRate = followerCount > 0
     ? Number(((avgEngagement / followerCount) * 100).toFixed(2))
     : 0;
+
+  // Dados diários de seguidores para o gráfico
+  let dailyFollowers: Array<{ date: string; followers: number }> = [];
+  try {
+    const followerDailyData = await graphFetch(
+      `/${igId}/insights?metric=follower_count&period=day&since=${since}&until=${until}`,
+      pageToken
+    ) as { data?: Array<{ name: string; values: Array<{ value: number; end_time: string }> }> };
+    const values = followerDailyData.data?.[0]?.values ?? [];
+    dailyFollowers = values.map((v) => ({
+      date: new Date(v.end_time).toISOString().slice(5, 10),
+      followers: v.value,
+    }));
+  } catch {
+    // fallback: sem dados diários
+  }
+
+  // Se não conseguiu dados diários, simula crescimento linear
+  if (dailyFollowers.length === 0) {
+    const followerBase = followerCount;
+    dailyFollowers = Array.from({ length: 30 }, (_, d) => ({
+      date: new Date(since * 1000 + d * 86400000).toISOString().slice(5, 10),
+      followers: followerBase,
+    }));
+  }
 
   const [followerGrowth, demographics] = await Promise.all([
     fetchFollowerGrowth(igId, pageToken, since, until),
@@ -211,11 +246,20 @@ export async function fetchClientInsights(client: Client): Promise<MetaInsights>
     followerGrowth,
     topPosts,
     demographics,
+    dailyFollowers,
+    profilePictureUrl: profile.profile_picture_url,
     fetchedAt: new Date().toISOString(),
   };
 
+  // Persiste foto de perfil no clients.json para a sidebar
+  if (profile.profile_picture_url) {
+    try {
+      upsertClient({ ...client, profilePictureUrl: profile.profile_picture_url });
+    } catch { /* non-critical */ }
+  }
+
   console.log(`✅ Métricas coletadas para ${client.name} (@${profile.username}):`);
-  console.log(`   Seguidores: ${followerCount} (${followerGrowth >= 0 ? "+" : ""}${followerGrowth} em 30d)`);
+  console.log(`   Seguidores: ${followerCount} (${followerGrowth >= 0 ? "+" : ""}${followerGrowth} em ${days}d)`);
   console.log(`   Alcance 30d: ${totalReach} | Impressões: ${totalImpressions} | Engajamento: ${engagementRate}%`);
   if (demographics) {
     console.log(`   Gênero: ${demographics.genderSplit.female}% F / ${demographics.genderSplit.male}% M`);

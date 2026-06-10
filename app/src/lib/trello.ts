@@ -110,3 +110,25 @@ export async function syncCalendarToTrello(
 
   console.log(`✅ Calendário sincronizado no Trello para ${client.name}`);
 }
+
+export interface TrelloCard {
+  id: string;
+  name: string;
+  desc: string;
+  due: string | null;
+  idList: string;
+  url: string;
+}
+
+export interface TrelloList {
+  id: string;
+  name: string;
+}
+
+export async function getBoardCards(boardId: string): Promise<{ cards: TrelloCard[]; lists: TrelloList[] }> {
+  const [cards, lists] = await Promise.all([
+    trelloFetch(`/boards/${boardId}/cards?fields=id,name,desc,due,idList,url`) as Promise<TrelloCard[]>,
+    trelloFetch(`/boards/${boardId}/lists?fields=id,name`) as Promise<TrelloList[]>,
+  ]);
+  return { cards, lists };
+}

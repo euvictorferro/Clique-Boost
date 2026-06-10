@@ -3,7 +3,7 @@ import { fetchClientInsights } from "@/lib/metaInsights";
 import { readClients } from "@/lib/clients";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ clientId: string }> }
 ) {
   const { clientId } = await params;
@@ -21,8 +21,12 @@ export async function GET(
     );
   }
 
+  // ?period=7 | 30 (Meta API não suporta >30 dias para follower_count)
+  const rawPeriod = req.nextUrl.searchParams.get("period");
+  const days = rawPeriod === "7" ? 7 : 30;
+
   try {
-    const insights = await fetchClientInsights(client);
+    const insights = await fetchClientInsights(client, days);
     return NextResponse.json(insights, {
       headers: { "Cache-Control": "s-maxage=3600, stale-while-revalidate" },
     });

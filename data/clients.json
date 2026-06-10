@@ -16,12 +16,14 @@
     "toneOfVoice": "Próximo e humano",
     "contentGoal": "Gerar leads qualificados",
     "hasVisualIdentity": true,
-    "brandColors": "Rosa (#E91E8C), Branco, Dourado",
+    "brandColors": "#0a0a0a,#eeebe5,#a2968f,#c49f82,#94694b",
+    "paletteNames": "Charcoal,Ivory Mist,Warm Stone,Cognac,Deep Cognac",
     "obsidianPath": "/Users/victorferro/Library/Mobile Documents/iCloud~md~obsidian/Documents/[Clique Boost] - Second Brain/01 - Clientes/lais-daltrozo",
     "createdAt": "2026-06-08T13:38:38.206Z",
     "status": "active",
     "metaAccessToken": "EAARkvZCtVmTkBRksjjdzx2Lp7JhWq5TNcdkn4GnNEatsyJ3cpfjAe3vbfS1CIdABJppWxxprAw64aRx8sc7J28Vwyhi3hBJPjWTn1oGx2IK998UrZAHDcoKwIVzNX62X6ZCMUtcaciBMximUnL4UHHSHSsql0eFnlpltMKVrBlHZBdNPzaabmbsiFI9qqg8SG1pGGZBxwu6T8ZB6Ua",
-    "trelloBoardId": "6a270d5958228e3184c33823"
+    "trelloBoardId": "6a1d9bfebe2405767f61e0d6",
+    "profilePictureUrl": "https://scontent.fsjk2-1.fna.fbcdn.net/v/t51.2885-15/228301097_134966542164359_2150956384796854751_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=7d201b&_nc_ohc=M3XWOWb7vc0Q7kNvwG5zneW&_nc_oc=AdpDkVoyvJUKEsm-V5FHx7-fSpNbA_FRhT-jcUJrjf1kSvyVL83OSR9Hg8fJHmV-dR2pd13CkzwHUsm9ArinVlk8&_nc_zt=23&_nc_ht=scontent.fsjk2-1.fna&edm=AL-3X8kEAAAA&oh=00_Af-YuPnuJ8JPBMouy0ChxUUCANMvsDyY3ldAeSR2xxrkXw&oe=6A2E7760"
   },
   {
     "id": "victor-hugo-ferro",
@@ -39,13 +41,15 @@
     "toneOfVoice": "Educativo e confiável",
     "contentGoal": "Vender diretamente pelas redes",
     "hasVisualIdentity": true,
-    "brandColors": "#8A2BE2 → #007BFF (gradient), #151515 e #FFFFFF",
+    "brandColors": "#8A2BE2,#007BFF,#151515,#FFFFFF,#00C49A,#F012BE",
+    "paletteNames": "Violeta,Azul,Preto,Branco,Teal,Cyber Pink",
     "obsidianPath": "/Users/victorferro/Library/Mobile Documents/iCloud~md~obsidian/Documents/[Clique Boost] - Second Brain/01 - Clientes/victor-hugo-ferro",
     "createdAt": "2026-06-08T14:36:37.297Z",
     "status": "active",
     "trelloBoardId": "6a26d40a3a5cf52c0c5c93cc",
     "metaAccessToken": "EAARkvZCtVmTkBRksjjdzx2Lp7JhWq5TNcdkn4GnNEatsyJ3cpfjAe3vbfS1CIdABJppWxxprAw64aRx8sc7J28Vwyhi3hBJPjWTn1oGx2IK998UrZAHDcoKwIVzNX62X6ZCMUtcaciBMximUnL4UHHSHSsql0eFnlpltMKVrBlHZBdNPzaabmbsiFI9qqg8SG1pGGZBxwu6T8ZB6Ua",
-    "instagramHandle": "cliqueboost"
+    "instagramHandle": "cliqueboost",
+    "profilePictureUrl": "https://scontent.fsjk2-1.fna.fbcdn.net/v/t51.82787-15/563584846_17916485475194074_5487550696556132928_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=7d201b&_nc_ohc=4DKhLoaxYxMQ7kNvwHhTmmf&_nc_oc=Adp0HcG3gqB9zJYPZHmcoIL9PR7PeH3WC1B8XyP-RYxcvACUVgY90ryDIOV2oZ_NhROn6h1imyuQpodNBtvBBA97&_nc_zt=23&_nc_ht=scontent.fsjk2-1.fna&edm=AL-3X8kEAAAA&_nc_gid=zl8uMIn8d7gwaX_8PoEXJA&oh=00_Af_YXDWXsjs7TpfYkeQARWPTsC0Yc5nzCZvOH-ZEX8aTOg&oe=6A2E82AA"
   },
   {
     "id": "sam-fernandes",
@@ -53,24 +57,22 @@
     "brandName": "Florida Connexion Properties",
     "niche": "real-estate",
     "instagramHandle": "samcorretororlando",
-    "competitors": [
-      "mulcy_orlando_homes",
-      "gabysadler",
-      "helenamello.imoveisluxosjc",
-      "ptriska"
-    ],
+    "competitors": [],
     "socialNetworks": [
       "Instagram",
       "Facebook"
     ],
     "toneOfVoice": "Explicativo, formal e sério — transmite experiência e credibilidade de 20 anos no mercado de Orlando",
     "contentGoal": "Gerar 5 leads qualificados/mês e chegar a 10K seguidores até janeiro 2026",
-    "hasVisualIdentity": false,
+    "hasVisualIdentity": true,
+    "brandColors": "#0E5D8F,#E75113,#242424,#FAFAFA,#B78A26",
+    "paletteNames": "Atlantic,Sunset,Metropolitan,Off White,Gold",
     "obsidianPath": "/Users/victorferro/Library/Mobile Documents/iCloud~md~obsidian/Documents/[Clique Boost] - Second Brain/01 - Clientes/sam-fernandes",
     "createdAt": "2026-06-08T16:00:00.000Z",
     "status": "active",
     "metaAccessToken": "EAARkvZCtVmTkBRksjjdzx2Lp7JhWq5TNcdkn4GnNEatsyJ3cpfjAe3vbfS1CIdABJppWxxprAw64aRx8sc7J28Vwyhi3hBJPjWTn1oGx2IK998UrZAHDcoKwIVzNX62X6ZCMUtcaciBMximUnL4UHHSHSsql0eFnlpltMKVrBlHZBdNPzaabmbsiFI9qqg8SG1pGGZBxwu6T8ZB6Ua",
-    "trelloBoardId": "6a270db26ddc949379dfcb2e"
+    "trelloBoardId": "68dacb7ba8957ca2511e9071",
+    "profilePictureUrl": "https://scontent.fsjk2-1.fna.fbcdn.net/v/t51.82787-15/554813743_18422948305105278_8480851322268828709_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=7d201b&_nc_ohc=SPUC-qPzL1MQ7kNvwGPhC9o&_nc_oc=AdoCz1JS5SPv67ZYADWSnmJorDJIT2-os25fmalTpBjRLYGHb74sbCBtUR6xu-35rMt9rYztM1NpzMHBJgGCzpr4&_nc_zt=23&_nc_ht=scontent.fsjk2-1.fna&edm=AL-3X8kEAAAA&_nc_gid=3m1PfJcXs4ZFOE9sI28geQ&oh=00_Af8pqleVFs2p6t2o3DHG778-nSxOXLxMNT10fWo1wSDsRg&oe=6A2E9210"
   },
   {
     "id": "isabela-castro",
@@ -91,10 +93,37 @@
     ],
     "toneOfVoice": "Amorosa, descontraída e inspiradora — vibe positiva, zen e transformadora",
     "contentGoal": "Crescer seguidores, engajamento e converter leads pelo conteúdo — meta de 1000 clientes na plataforma",
-    "hasVisualIdentity": false,
+    "hasVisualIdentity": true,
+    "brandColors": "#fecea8,#99b898,#ff847c,#FFFFFF,#8B7355",
+    "paletteNames": "Warm Embrace,Renewal,Vitality,White,Earth Root",
     "obsidianPath": "/Users/victorferro/Library/Mobile Documents/iCloud~md~obsidian/Documents/[Clique Boost] - Second Brain/01 - Clientes/isabela-castro",
     "createdAt": "2026-06-08T16:00:00.000Z",
     "status": "active",
-    "metaAccessToken": "EAARkvZCtVmTkBRksjjdzx2Lp7JhWq5TNcdkn4GnNEatsyJ3cpfjAe3vbfS1CIdABJppWxxprAw64aRx8sc7J28Vwyhi3hBJPjWTn1oGx2IK998UrZAHDcoKwIVzNX62X6ZCMUtcaciBMximUnL4UHHSHSsql0eFnlpltMKVrBlHZBdNPzaabmbsiFI9qqg8SG1pGGZBxwu6T8ZB6Ua"
+    "trelloBoardId": "68f4f4c34ad83399f540858a",
+    "metaAccessToken": "EAARkvZCtVmTkBRksjjdzx2Lp7JhWq5TNcdkn4GnNEatsyJ3cpfjAe3vbfS1CIdABJppWxxprAw64aRx8sc7J28Vwyhi3hBJPjWTn1oGx2IK998UrZAHDcoKwIVzNX62X6ZCMUtcaciBMximUnL4UHHSHSsql0eFnlpltMKVrBlHZBdNPzaabmbsiFI9qqg8SG1pGGZBxwu6T8ZB6Ua",
+    "profilePictureUrl": "https://scontent.fsjk2-1.fna.fbcdn.net/v/t51.2885-15/411368268_1099902531368826_13893505341375023_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=7d201b&_nc_ohc=0IJhpc91LHYQ7kNvwGkh76s&_nc_oc=Adoh3HNT_weIJPOU89GCzL-hpE0khRindDy06OEEPpPtDbeAOWMzd2j7siXarpkw3WtxPaxehrrfpJZK2-MZeBA2&_nc_zt=23&_nc_ht=scontent.fsjk2-1.fna&edm=AL-3X8kEAAAA&oh=00_Af8Blf8PgpB9MOHDi5uXB8K5jpNNmoz9KVKUMMl2Yd5omQ&oe=6A2E9C8D"
+  },
+  {
+    "id": "tiago-zamboni",
+    "name": "Tiago Zamboni",
+    "brandName": "Tiago Zamboni",
+    "niche": "real-estate",
+    "instagramHandle": "",
+    "competitors": [],
+    "socialNetworks": [
+      "Instagram"
+    ],
+    "toneOfVoice": "",
+    "contentGoal": "",
+    "hasVisualIdentity": true,
+    "brandColors": "#b38f43,#ebd175,#12324a,#111111,#f7f4ee",
+    "paletteNames": "Gold Dark,Gold Light,Navy Blue,Black,Off White",
+    "obsidianPath": "/Users/victorferro/Library/Mobile Documents/iCloud~md~obsidian/Documents/[Clique Boost] - Second Brain/01 - Clientes/tiago-zamboni",
+    "createdAt": "2026-06-08T20:00:00.000Z",
+    "status": "active",
+    "trelloBoardId": "6a15e2cce98811c102520e22",
+    "metaAccessToken": "EAARkvZCtVmTkBRpGgUxlBZC80fg25mdsZBTWHGxxN4b4aml367iOJF4SauNI8JrTtI4PWa7zreruleMaSYuANgseIISEdO4Tju77qxEPZAK4dcENXbhbks423E3KZCvx0YT3Cvql4iITjgI7WFjEbe0FIcYWZCN6U1mHAgam1OC2tHkrhnpNtNAuCUIPx7dCUu6ZBkibrkK2ZCKxtane",
+    "metaTokenExpiresAt": "2026-08-09T00:08:40.184Z",
+    "profilePictureUrl": "https://scontent.fsjk2-1.fna.fbcdn.net/v/t51.2885-15/228301097_134966542164359_2150956384796854751_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=7d201b&_nc_ohc=M3XWOWb7vc0Q7kNvwG5zneW&_nc_oc=AdpDkVoyvJUKEsm-V5FHx7-fSpNbA_FRhT-jcUJrjf1kSvyVL83OSR9Hg8fJHmV-dR2pd13CkzwHUsm9ArinVlk8&_nc_zt=23&_nc_ht=scontent.fsjk2-1.fna&edm=AL-3X8kEAAAA&oh=00_Af-YuPnuJ8JPBMouy0ChxUUCANMvsDyY3ldAeSR2xxrkXw&oe=6A2E7760"
   }
 ]
