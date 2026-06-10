@@ -17,6 +17,7 @@ interface CompetitorPost {
   type: string;
   url: string;
   displayUrl: string;
+  videoUrl?: string;
   timestamp: string;
   likesCount: number;
   commentsCount: number;
@@ -182,6 +183,7 @@ export async function POST(
         type: p.type ?? p.productType ?? "Image",
         url: p.url ?? `https://instagram.com/p/${p.shortCode}/`,
         displayUrl: p.displayUrl ?? p.thumbnailSrc ?? "",
+        videoUrl: p.videoUrl ?? p.videoSrc ?? undefined,
         timestamp: p.timestamp ?? p.takenAtTimestamp ?? new Date().toISOString(),
         likesCount: p.likesCount ?? p.likes ?? 0,
         commentsCount: p.commentsCount ?? p.comments ?? 0,
