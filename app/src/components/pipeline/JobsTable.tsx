@@ -21,39 +21,66 @@ interface Job {
 
 const JOBS: Job[] = [
   {
-    id: "metrics",
-    name: "Coleta de Métricas",
-    frequency: "Todo dia",
-    nextRun: (() => {
-      const d = new Date();
-      d.setDate(d.getDate() + 1);
-      return d.toLocaleDateString("pt-BR");
-    })(),
-    description: "Busca seguidores, alcance, impressões, engajamento e top posts de cada cliente via Meta API",
-  },
-  {
-    id: "weekly-refresh",
-    name: "Refresh Semanal",
-    frequency: "Toda segunda",
-    nextRun: (() => {
-      const d = new Date();
-      const day = d.getDay();
-      const daysUntilMonday = day === 1 ? 7 : (8 - day) % 7;
-      d.setDate(d.getDate() + daysUntilMonday);
-      return d.toLocaleDateString("pt-BR");
-    })(),
-    description: "Re-escaneia concorrentes e atualiza tópicos do Trello para a semana seguinte",
-  },
-  {
     id: "calendar",
-    name: "Calendário Mensal",
+    name: "📅 Geração de Calendário Mensal",
     frequency: "Todo dia 1",
     nextRun: (() => {
       const d = new Date();
       d.setMonth(d.getMonth() + 1, 1);
       return d.toLocaleDateString("pt-BR");
     })(),
-    description: "Verifica cards do Trello de todos os clientes e atualiza o calendário de conteúdo",
+    description: "Gera 20–25 posts/cliente com Claude (ICP + estratégia + concorrentes) e cria cards no Trello. Roda para todos os clientes.",
+  },
+  {
+    id: "metrics",
+    name: "📊 Coleta de Métricas",
+    frequency: "Todo dia às 7h",
+    nextRun: (() => {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      d.setHours(7, 0, 0, 0);
+      return d.toLocaleDateString("pt-BR");
+    })(),
+    description: "Busca seguidores, alcance, impressões, engajamento e top posts de cada cliente via Meta API.",
+  },
+  {
+    id: "weekly-analysis",
+    name: "🔍 Análise Semanal",
+    frequency: "Toda sexta às 9h",
+    nextRun: (() => {
+      const d = new Date();
+      const day = d.getDay();
+      const daysUntilFri = day <= 5 ? 5 - day : 6;
+      d.setDate(d.getDate() + (daysUntilFri || 7));
+      return d.toLocaleDateString("pt-BR");
+    })(),
+    description: "Analisa posts da semana: top performers, flopped posts, padrões. Gera relatório com recomendações e salva no Obsidian.",
+  },
+  {
+    id: "weekly-refresh",
+    name: "🔄 Refresh Semanal de Conteúdo",
+    frequency: "Toda sexta às 9h30",
+    nextRun: (() => {
+      const d = new Date();
+      const day = d.getDay();
+      const daysUntilFri = day <= 5 ? 5 - day : 6;
+      d.setDate(d.getDate() + (daysUntilFri || 7));
+      return d.toLocaleDateString("pt-BR");
+    })(),
+    description: "Com base na análise + trending de concorrentes, substitui posts da próxima semana por conteúdos mais relevantes.",
+  },
+  {
+    id: "weekly-full",
+    name: "⚡ Ciclo Semanal Completo",
+    frequency: "Manual ou toda sexta",
+    nextRun: (() => {
+      const d = new Date();
+      const day = d.getDay();
+      const daysUntilFri = day <= 5 ? 5 - day : 6;
+      d.setDate(d.getDate() + (daysUntilFri || 7));
+      return d.toLocaleDateString("pt-BR");
+    })(),
+    description: "Executa Análise + Refresh em sequência para todos os clientes. Recomendado rodar manualmente toda sexta.",
   },
 ];
 
@@ -111,17 +138,19 @@ export function JobsTable({ onJobRun }: { onJobRun?: () => void }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ job: jobId }),
     });
-    // Poll until done
+    // Jobs longos (calendar, weekly-full) podem demorar até 3 min
+    const isLongJob = ["calendar", "weekly-full", "weekly-analysis", "weekly-refresh"].includes(jobId);
+    const maxWait = isLongJob ? 180_000 : 20_000;
     const poll = setInterval(() => {
       loadLastRuns();
       onJobRun?.();
-    }, 1500);
+    }, 2500);
     setTimeout(() => {
       clearInterval(poll);
       setRunning(null);
       loadLastRuns();
       onJobRun?.();
-    }, 15000);
+    }, maxWait);
   };
 
   return (
