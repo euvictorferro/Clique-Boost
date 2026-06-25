@@ -27,8 +27,8 @@ export async function GET(
   // Markdown content from Obsidian paleta.md
   let content = "";
   try {
-    const mdPath = path.join(client.obsidianPath, "paleta.md");
-    if (existsSync(mdPath)) content = readFileSync(mdPath, "utf-8");
+    const { readNote } = await import("@/lib/obsidian");
+    content = readNote(clientId, "paleta.md") ?? "";
   } catch { /* ignore */ }
 
   return NextResponse.json({ content, swatches });

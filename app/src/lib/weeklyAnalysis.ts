@@ -9,10 +9,9 @@
  * - Salva em Obsidian
  */
 
-import { writeFileSync, mkdirSync, existsSync } from "fs";
-import path from "path";
 import { Client, MetaPost } from "./types";
 import { fetchClientInsights } from "./metaInsights";
+import { writeAnalysis } from "./obsidian";
 import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -202,13 +201,10 @@ Formato da resposta: primeiro o texto da análise, depois uma linha com "---JSON
   };
 
   // Salva no Obsidian
-  if (OBSIDIAN && client.obsidianPath) {
+  if (OBSIDIAN) {
     try {
-      const analysesDir = path.join(client.obsidianPath, "analises");
-      if (!existsSync(analysesDir)) mkdirSync(analysesDir, { recursive: true });
-      const filename = `${weekLabel}.md`;
-      writeFileSync(path.join(analysesDir, filename), formatInsightsMd(result), "utf-8");
-      console.log(`✅ Análise salva: ${client.id}/analises/${filename}`);
+      writeAnalysis(client.id, weekLabel, formatInsightsMd(result));
+      console.log(`✅ Análise salva: ${client.id}/Análises/${weekLabel}.md`);
     } catch (err) {
       console.warn("⚠️ Erro ao salvar análise no Obsidian:", err);
     }

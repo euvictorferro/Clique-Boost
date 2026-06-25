@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import path from "path";
 import { readClients, upsertClient } from "@/lib/clients";
 import { scrapeRecentPosts } from "@/lib/apify";
+import { writeNote } from "@/lib/obsidian";
 
 const DATA_DIR = path.join(process.cwd(), "..", "data", "competitors");
 
@@ -46,8 +47,9 @@ function writeCache(clientId: string, posts: CompetitorPost[]) {
 }
 
 /** Write/update concorrentes.md in Obsidian vault */
-function saveToObsidian(obsidianPath: string, competitors: string[], posts: CompetitorPost[]) {
-  if (!obsidianPath) return;
+function saveToObsidian(clientId: string, competitors: string[], posts: CompetitorPost[]) {
+  if (!clientId) return;
+  const obsidianPath = clientId; // usado apenas para compatibilidade abaixo
   try {
     const now = new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
     const lines: string[] = [
@@ -84,7 +86,7 @@ function saveToObsidian(obsidianPath: string, competitors: string[], posts: Comp
       }
     }
 
-    writeFileSync(path.join(obsidianPath, "concorrentes.md"), lines.join("\n"), "utf-8");
+    writeNote(clientId, "concorrentes.md", lines.join("\n"));
   } catch { /* vault may not be mounted */ }
 }
 
@@ -150,7 +152,7 @@ export async function PATCH(
   // Update Obsidian (just the list, no posts yet)
   if (client.obsidianPath) {
     const cache = readCache(clientId);
-    saveToObsidian(client.obsidianPath, updated, cache?.posts ?? []);
+    saveToObsidian(client.id, updated, cache?.posts ?? []);
   }
 
   return NextResponse.json({ ok: true, competitors: updated });
@@ -203,7 +205,7 @@ export async function POST(
 
   // Save to Obsidian
   if (client.obsidianPath) {
-    saveToObsidian(client.obsidianPath, competitors, allPosts);
+    saveToObsidian(client.id, competitors, allPosts);
   }
 
   return NextResponse.json({

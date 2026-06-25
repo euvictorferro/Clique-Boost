@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import path from "path";
+import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { appendLog, updateLog } from "@/lib/pipelineLog";
 import { readClients } from "@/lib/clients";
 import { fetchClientInsights } from "@/lib/metaInsights";
@@ -6,6 +8,7 @@ import { generateMonthlyCalendar } from "@/lib/contentCalendar";
 import { syncCalendarToTrello } from "@/lib/trello";
 import { runWeeklyAnalysis } from "@/lib/weeklyAnalysis";
 import { runWeeklyRefresh } from "@/lib/weeklyRefresh";
+import { generateWeekPosts } from "@/lib/postGenerator";
 
 const VALID_JOBS = [
   "metrics",
@@ -87,7 +90,7 @@ async function runCalendar(clientId: string | undefined): Promise<void> {
       // Sincroniza com Trello se o cliente tiver board
       let trelloCount = 0;
       if (client.trelloBoardId) {
-        await syncCalendarToTrello(client.trelloBoardId, calendar);
+        await syncCalendarToTrello(client, calendar);
         trelloCount = calendar.posts.length;
       }
 
@@ -99,7 +102,7 @@ async function runCalendar(clientId: string | undefined): Promise<void> {
           { label: "Posts gerados", value: calendar.posts.length },
           { label: "Mês", value: month },
           { label: "Trello", value: trelloCount > 0 ? `${trelloCount} cards criados` : "Board não configurado" },
-          { label: "Obsidian", value: "Salvo em 03 - Calendários/" },
+          { label: "Obsidian", value: `Salvo em ${client.id}/Calendários/` },
         ],
       });
     } catch (err) {
@@ -140,7 +143,7 @@ async function runAnalysis(clientId: string | undefined): Promise<void> {
           { label: "Eng. médio", value: result.avgEngagement.toLocaleString("pt-BR") },
           { label: "Top performer", value: result.topPerformers[0]?.mediaType ?? "—" },
           { label: "Recomendações", value: result.recommendations.length },
-          { label: "Obsidian", value: `analises/${result.weekLabel}.md` },
+          { label: "Obsidian", value: `Análises/${result.weekLabel}.md` },
         ],
       });
     } catch (err) {
@@ -190,6 +193,54 @@ async function runRefresh(clientId: string | undefined): Promise<void> {
   }
 }
 
+// ─── Geração de posts semanais ────────────────────────────────────────────────
+async function runGeneratePosts(clientId: string | undefined, week?: number): Promise<void> {
+  const now = new Date();
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const nextWeekNum = week ?? Math.ceil((now.getDate() + 7) / 7);
+  const dataDir = path.join(process.cwd(), "..", "data");
+  const clients = readClients().filter((c) => !clientId || c.id === clientId);
+
+  for (const client of clients) {
+    const startMs = Date.now();
+    const entry = appendLog({
+      date: new Date().toISOString(),
+      job: "weekly-refresh",
+      clientId: client.id,
+      clientName: client.name,
+      status: "running",
+      message: `Gerando posts da Semana ${nextWeekNum} para ${client.name}…`,
+    });
+    try {
+      const posts = await generateWeekPosts(client, nextWeekNum, month, dataDir);
+
+      // Salva em data/generated-posts/
+      const outDir = path.join(dataDir, "generated-posts");
+      if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
+      const outFile = path.join(outDir, `${client.id}-${month}-w${nextWeekNum}.json`);
+      writeFileSync(outFile, JSON.stringify(posts, null, 2), "utf-8");
+
+      updateLog(entry.id, {
+        status: "success",
+        durationMs: Date.now() - startMs,
+        message: `${posts.length} posts gerados para Semana ${nextWeekNum}`,
+        details: [
+          { label: "Posts", value: posts.length },
+          { label: "Semana", value: nextWeekNum },
+          { label: "Mês", value: month },
+          { label: "Arquivo", value: `generated-posts/${client.id}-${month}-w${nextWeekNum}.json` },
+        ],
+      });
+    } catch (err) {
+      updateLog(entry.id, {
+        status: "error",
+        durationMs: Date.now() - startMs,
+        message: err instanceof Error ? err.message : "Erro ao gerar posts",
+      });
+    }
+  }
+}
+
 // ─── POST handler ─────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
@@ -212,6 +263,7 @@ export async function POST(req: NextRequest) {
       else if (job === "weekly-full") {
         await runAnalysis(clientId);
         await runRefresh(clientId);
+        await runGeneratePosts(clientId);
       }
     } catch (err) {
       console.error(`[pipeline] Unhandled error in job "${job}":`, err);

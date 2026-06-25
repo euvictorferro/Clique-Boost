@@ -10,13 +10,14 @@
  * com conteúdo mais relevante.
  */
 
-import { readFileSync, existsSync } from "fs";
+import { readdirSync } from "fs";
 import path from "path";
 import { Client, ContentPost } from "./types";
 import { getViralPosts } from "./apify";
 import { getBoardCards, getOrCreateList, createCard, TrelloCard, TrelloList } from "./trello";
 import Anthropic from "@anthropic-ai/sdk";
 import { WeeklyAnalysisResult } from "./weeklyAnalysis";
+import { readNote, getClientPath } from "./obsidian";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const OBSIDIAN = process.env.OBSIDIAN_VAULT_PATH ?? "";
@@ -30,16 +31,14 @@ function weekOfMonth(date: Date): number {
 /** Lê análise salva da semana passada, se existir */
 function readLastAnalysis(client: Client): WeeklyAnalysisResult | null {
   try {
-    const analysesDir = path.join(client.obsidianPath ?? "", "analises");
-    if (!existsSync(analysesDir)) return null;
-    // Lê todos os arquivos e pega o mais recente
-    const files = require("fs").readdirSync(analysesDir)
+    const analysesDir = path.join(getClientPath(client.id), "Análises");
+    const files = readdirSync(analysesDir)
       .filter((f: string) => f.endsWith(".md"))
       .sort()
       .reverse();
     if (!files.length) return null;
-    const content = readFileSync(path.join(analysesDir, files[0]), "utf-8");
-    // Extrai recomendações do markdown
+    const fs = require("fs");
+    const content = fs.readFileSync(path.join(analysesDir, files[0]), "utf-8");
     const recSection = content.split("## ✅ Recomendações para a Próxima Semana")[1];
     const recommendations = recSection
       ? recSection.trim().split("\n")
@@ -54,11 +53,7 @@ function readLastAnalysis(client: Client): WeeklyAnalysisResult | null {
 
 /** Lê estratégia do Obsidian */
 function readStrategy(client: Client): string {
-  try {
-    const p = path.join(client.obsidianPath ?? "", "estrategia-conteudo.md");
-    if (existsSync(p)) return readFileSync(p, "utf-8").slice(0, 2000);
-  } catch {}
-  return "";
+  return (readNote(client.id, "estrategia-conteudo.md") ?? "").slice(0, 2000);
 }
 
 export interface RefreshResult {

@@ -8,6 +8,8 @@
 import { readFileSync, existsSync } from "fs";
 import path from "path";
 import Anthropic from "@anthropic-ai/sdk";
+import { getAllCopySkills } from "../prompts/copySkills";
+import { readNote } from "./obsidian";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -28,13 +30,9 @@ export interface GeneratedPost {
   status: "rascunho";  // sempre começa como rascunho
 }
 
-/** Lê um arquivo do Obsidian se existir, senão retorna string vazia */
-function readObsidian(obsidianPath: string, filename: string): string {
-  try {
-    const p = path.join(obsidianPath, filename);
-    if (existsSync(p)) return readFileSync(p, "utf-8").slice(0, 3000);
-  } catch {}
-  return "";
+/** Lê um arquivo do Obsidian pelo clientId */
+function readObsidian(clientId: string, filename: string): string {
+  return (readNote(clientId, filename) ?? "").slice(0, 3000);
 }
 
 /** Lê posts de concorrentes já analisados */
@@ -80,9 +78,10 @@ export async function generateWeekPosts(
   const [year, monthNum] = month.split("-").map(Number);
   const days = weekDays(year, monthNum, week);
 
-  const icp = readObsidian(client.obsidianPath, "ICP.md");
-  const strategy = readObsidian(client.obsidianPath, "estrategia-conteudo.md");
-  const funnel = readObsidian(client.obsidianPath, "funil-organico.md");
+  const icp = readObsidian(client.id, "ICP.md");
+  const strategy = readObsidian(client.id, "estrategia-conteudo.md");
+  const funnel = readObsidian(client.id, "funil-organico.md");
+  const voz = readObsidian(client.id, "voz.md");
   const competitors = readCompetitorInsights(dataDir, client.id);
 
   const nicheLabel =
@@ -92,9 +91,14 @@ export async function generateWeekPosts(
       ? "mercado imobiliário"
       : "marketing digital e social media";
 
-  const prompt = `Você é um estrategista de conteúdo especializado em ${nicheLabel} para criadores brasileiros nos EUA.
+  const prompt = `Você é um estrategista de conteúdo sênior especializado em ${nicheLabel} para criadores brasileiros nos EUA. Você escreve copy que soa humana, específica e persuasiva, nunca genérica.
 
 Crie 5 posts para a Semana ${week} de ${new Date(year, monthNum - 1).toLocaleString("pt-BR", { month: "long", year: "numeric" })} para o cliente **${client.name}** (${client.brandName ?? client.name}).
+
+**IDENTIDADE DO CLIENTE:**
+- Tom de voz: ${client.toneOfVoice || "Profissional e próximo"}
+- Objetivo: ${client.contentGoal || "Gerar leads qualificados"}
+- Nicho: ${nicheLabel}
 
 **Dias disponíveis:**
 ${days.map((d) => `- ${d.weekday}, dia ${d.day}`).join("\n")}
@@ -105,14 +109,13 @@ ${strategy ? `**Estratégia de conteúdo:**\n${strategy}` : ""}
 
 ${funnel ? `**Funil orgânico:**\n${funnel}` : ""}
 
-${
-  competitors
-    ? `**O que está viralizando nos concorrentes (inspire-se, não copie):**\n${competitors}`
-    : ""
-}
+${voz ? `**VOZ E PERSONALIDADE DO CLIENTE (siga rigorosamente — isso define o tom de TUDO):**\n${voz}` : ""}
 
-**Tom de voz:** ${client.toneOfVoice || "Profissional e próximo"}
-**Objetivo geral:** ${client.contentGoal || "Gerar leads qualificados"}
+${competitors ? `**O que está viralizando nos concorrentes (inspire-se, não copie):**\n${competitors}` : ""}
+
+${getAllCopySkills()}
+
+ATENÇÃO ESPECIAL para a "caption": ela deve seguir a skill do formato do post. Para Carrossel, descreva slide a slide. Para Reel, escreva como legenda de vídeo. Para Foto, conte uma história. Nunca bullet points genéricos.
 
 Retorne EXATAMENTE um JSON array com 5 objetos. Cada objeto deve ter:
 {
@@ -120,11 +123,11 @@ Retorne EXATAMENTE um JSON array com 5 objetos. Cada objeto deve ter:
   "theme": "tema do post (max 60 chars)",
   "format": "Reel" | "Carrossel" | "Foto" | "Stories",
   "platform": "Instagram",
-  "hook": "primeira frase que prende atenção (max 100 chars)",
-  "caption": "legenda completa sugerida (200-400 chars)",
-  "hashtags": ["hashtag1", "hashtag2", "hashtag3", "hashtag4", "hashtag5"],
+  "hook": "primeira frase que prende atenção seguindo a skill do formato (max 100 chars)",
+  "caption": "legenda completa seguindo a skill de copy do formato (200-400 chars)",
+  "hashtags": ["hashtag1", "hashtag2", "hashtag3"],
   "objective": "objetivo no funil (TOFU/MOFU/BOFU)",
-  "cta": "call to action (max 60 chars)",
+  "cta": "call to action específico (max 60 chars)",
   "pillar": "pilar de conteúdo"
 }
 

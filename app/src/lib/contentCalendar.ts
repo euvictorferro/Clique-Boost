@@ -3,10 +3,13 @@ import { getViralPosts, getViralPostsByNiche } from "./apify";
 import { callClaude } from "./claude";
 import { readNote, writeCalendar } from "./obsidian";
 import { upsertClient, getClient } from "./clients";
+import { getAllCopySkills } from "../prompts/copySkills";
 
 function buildCalendarPrompt(
   client: Client,
   icpContent: string,
+  strategyContent: string,
+  vozContent: string,
   viralPosts: InstagramPost[],
   month: string
 ): string {
@@ -20,19 +23,29 @@ function buildCalendarPrompt(
   const platforms = client.socialNetworks ?? ["Instagram"];
   const hasTikTok = platforms.some(p => p.toLowerCase().includes("tiktok"));
 
-  return `Você é um estrategista digital sênior especializado em ${nicheLabel}. Você pensa como gestor de conteúdo, não como redator. Seu trabalho é criar uma pauta mensal que gere resultados de negócio reais.
+  return `Você é um estrategista digital sênior especializado em ${nicheLabel}. Você pensa como gestor de conteúdo de alto nível, não como redator genérico. Seu trabalho é criar uma pauta mensal que gere resultados de negócio reais para ${client.brandName}.
 
-CLIENTE: ${client.brandName}
-PLATAFORMAS ATIVAS: ${platforms.join(", ")}
-TOM DE VOZ: ${client.toneOfVoice}
-OBJETIVO PRINCIPAL: ${client.contentGoal}
-MÊS: ${month}
+IDENTIDADE DO CLIENTE:
+- Nome/Marca: ${client.brandName}
+- Tom de voz: ${client.toneOfVoice}
+- Objetivo principal: ${client.contentGoal}
+- Nicho: ${nicheLabel}
+- Plataformas ativas: ${platforms.join(", ")}
+- Mês: ${month}
 
-ICP DO CLIENTE:
+ICP (CLIENTE IDEAL):
 ${icpContent.slice(0, 2000)}
 
-REFERÊNCIAS VIRAIS DO NICHO (últimos 30 dias):
+${strategyContent ? `ESTRATÉGIA DE CONTEÚDO DO CLIENTE:
+${strategyContent.slice(0, 2000)}
+
+` : ""}${vozContent ? `VOZ E PERSONALIDADE DO CLIENTE (siga rigorosamente):
+${vozContent.slice(0, 1500)}
+
+` : ""}REFERÊNCIAS VIRAIS DO NICHO (últimos 30 dias):
 ${viralSummary}
+
+${getAllCopySkills()}
 
 REGRAS ESTRATÉGICAS OBRIGATÓRIAS:
 1. Crie exatamente 20 posts de feed para o mês (5 por semana).
@@ -41,7 +54,8 @@ REGRAS ESTRATÉGICAS OBRIGATÓRIAS:
 4. Para cada post com Reel, sugira uma ideia de Stories complementar para o mesmo dia (campo "storiesIdea").
 5. Explique a decisão estratégica de cada post no campo "rationale" — por que este tema neste momento do mês, o que ele resolve para o ICP.
 6. Distribua os objetivos ao longo do mês: semanas 1-2 = awareness/educação, semanas 3-4 = conversão/prova social.
-7. Gancho deve ser específico e gerar curiosidade — evite ganchos genéricos como "Você sabia que...".
+7. O gancho de cada post DEVE seguir as regras de copy do formato correspondente definidas acima.
+8. Se houver estratégia de conteúdo definida, os temas e pilares devem respeitar os pilares estratégicos do cliente.
 
 Responda APENAS com um JSON válido no seguinte formato (sem markdown, sem explicações):
 
@@ -106,8 +120,10 @@ export async function generateMonthlyCalendar(
 ): Promise<ContentCalendar> {
   console.log(`📅 Gerando calendário ${month} para ${client.name}...`);
 
-  // Buscar ICP do Obsidian
+  // Buscar ICP, estratégia e voz do cliente do Obsidian
   const icpContent = readNote(client.id, "ICP.md") ?? "ICP não disponível";
+  const strategyContent = readNote(client.id, "estrategia-conteudo.md") ?? "";
+  const vozContent = readNote(client.id, "voz.md") ?? "";
 
   // Scraping de concorrentes ou pesquisa de mercado por nicho
   let viralPosts: InstagramPost[] = [];
@@ -133,7 +149,7 @@ export async function generateMonthlyCalendar(
     }
   }
 
-  const prompt = buildCalendarPrompt(client, icpContent, viralPosts, month);
+  const prompt = buildCalendarPrompt(client, icpContent, strategyContent, vozContent, viralPosts, month);
   const raw = await callClaude(prompt, 6000);
 
   let posts: ContentPost[] = [];
@@ -177,7 +193,7 @@ export async function refreshWeeklyTopics(clientId: string): Promise<void> {
       const refreshNote = `\n\n---\n\n## Atualização Semanal — ${new Date().toLocaleDateString("pt-BR")}\n\n### Trending nos concorrentes:\n${trending.map((t) => `- ${t}`).join("\n")}\n`;
       const calPath = require("path").join(
         process.env.OBSIDIAN_VAULT_PATH!,
-        "03 - Calendários",
+        "Calendários",
         `${client.id}-${month}.md`
       );
       if (require("fs").existsSync(calPath)) {

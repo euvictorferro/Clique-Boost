@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readFileSync, writeFileSync } from "fs";
-import path from "path";
 import { readClients } from "@/lib/clients";
-
-function icpPath(obsidianPath: string) {
-  return path.join(obsidianPath, "ICP.md");
-}
+import { readNote, writeNote } from "@/lib/obsidian";
 
 export async function GET(
   _req: NextRequest,
@@ -15,12 +10,8 @@ export async function GET(
   const client = readClients().find((c) => c.id === clientId);
   if (!client) return NextResponse.json({ error: "not found" }, { status: 404 });
 
-  try {
-    const content = readFileSync(icpPath(client.obsidianPath), "utf-8");
-    return NextResponse.json({ content });
-  } catch {
-    return NextResponse.json({ content: "" });
-  }
+  const content = readNote(clientId, "ICP.md") ?? "";
+  return NextResponse.json({ content });
 }
 
 export async function POST(
@@ -38,7 +29,7 @@ export async function POST(
   }
 
   try {
-    writeFileSync(icpPath(client.obsidianPath), content, "utf-8");
+    writeNote(clientId, "ICP.md", content);
     return NextResponse.json({ ok: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Write failed";

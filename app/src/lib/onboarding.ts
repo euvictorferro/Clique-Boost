@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { BriefingResponse, Client } from "./types";
 import { slugify, upsertClient } from "./clients";
 import { writeNote, ensureClientFolder, getClientPath } from "./obsidian";
+import { createBoard, syncCalendarToTrello } from "./trello";
 
 function formatBriefingNote(briefing: BriefingResponse): string {
   const lines: string[] = [
@@ -69,12 +70,81 @@ function formatBriefingNote(briefing: BriefingResponse): string {
   return lines.join("\n");
 }
 
+function formatVozTemplate(briefing: BriefingResponse): string {
+  return `---
+tags: [voz, personalidade, ${slugify(briefing.clientName)}]
+cliente: ${slugify(briefing.clientName)}
+---
+
+# Voz & Personalidade — ${briefing.brandName}
+
+> Arquivo lido automaticamente pelo sistema para personalizar geração de conteúdo.
+> Preencha e atualize conforme você conhecer melhor o cliente.
+
+---
+
+## Tom e Personalidade
+
+${briefing.toneOfVoice}
+
+*(Expanda aqui com mais detalhes sobre energia, ritmo, proximidade)*
+
+---
+
+## Frases e expressões que ele/ela usaria
+
+*(Preencha com falas reais que o cliente usa ou aprovaria)*
+
+---
+
+## Frases que ele/ela NUNCA usaria
+
+*(Preencha com o que está fora do tom ou posicionamento)*
+
+---
+
+## Público com quem ele/ela fala
+
+${briefing.idealClient}
+
+---
+
+## Objetivo principal do conteúdo
+
+${briefing.contentGoal}
+
+---
+
+## Ganchos que funcionam no nicho
+
+*(Preencha conforme você conhecer os posts que performam)*
+
+---
+
+## Posts que já funcionaram bem
+
+*(Cole aqui legendas de posts com bom engajamento)*
+`.trim();
+}
+
 export async function onboardClient(briefing: BriefingResponse): Promise<Client> {
   const id = slugify(briefing.clientName) || uuidv4();
   const obsidianPath = getClientPath(id);
 
   ensureClientFolder(id);
   writeNote(id, "briefing.md", formatBriefingNote(briefing));
+  writeNote(id, "voz.md", formatVozTemplate(briefing));
+
+  // Cria board no Trello automaticamente
+  let trelloBoardId: string | undefined;
+  if (process.env.TRELLO_API_KEY && process.env.TRELLO_TOKEN) {
+    try {
+      trelloBoardId = await createBoard(briefing.brandName);
+      console.log(`✅ Board Trello criado: ${briefing.brandName} (${trelloBoardId})`);
+    } catch (err) {
+      console.warn("⚠️ Falha ao criar board Trello:", err);
+    }
+  }
 
   const client: Client = {
     id,
@@ -89,6 +159,7 @@ export async function onboardClient(briefing: BriefingResponse): Promise<Client>
     hasVisualIdentity: briefing.hasVisualIdentity,
     brandColors: briefing.brandColors,
     obsidianPath,
+    trelloBoardId,
     createdAt: new Date().toISOString(),
     status: "onboarding",
   };
