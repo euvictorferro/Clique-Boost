@@ -145,12 +145,10 @@ export default function MeetingsPage({ params }: { params: Promise<{ clientId: s
       )}
 
       {/* Sync hint */}
-      {meetings.length > 0 && (
-        <div className="mt-6 p-3 bg-[#f5f5f5] rounded-lg text-[11px] text-[#888]">
-          💡 Para sincronizar novas reuniões, peça ao Claude:{" "}
-          <span className="font-mono text-[#555]">"Sincroniza as reuniões do Granola"</span>
-        </div>
-      )}
+      <div className="mt-6 p-3 bg-[#f5f5f5] rounded-lg text-[11px] text-[#888]">
+        💡 Para sincronizar novas reuniões do Granola, peça ao Claude:{" "}
+        <span className="font-mono text-[#555]">"Sincroniza as reuniões do Granola para [nome do cliente]"</span>
+      </div>
     </div>
   );
 }

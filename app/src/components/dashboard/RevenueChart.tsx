@@ -48,7 +48,7 @@ export function RevenueChart() {
             tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`}
           />
           <Tooltip
-            formatter={(v: number) => [fmt(v), "Faturamento"]}
+            formatter={(v: unknown) => [fmt(Number(v)), "Faturamento"] as [string, string]}
             contentStyle={{
               border: "1px solid #e5e5e5",
               borderRadius: 8,

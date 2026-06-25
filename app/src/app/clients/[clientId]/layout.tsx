@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
-import { BarChart2, Calendar, FileText, Palette, Settings, TrendingUp, Users, NotebookPen } from "lucide-react";
+import { BarChart2, Calendar, FileText, Film, Palette, Settings, TrendingUp, Users, NotebookPen } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const TABS = [
@@ -11,6 +11,7 @@ const TABS = [
   { slug: "calendar",    icon: Calendar,   label: "Calendário" },
   { slug: "competitors", icon: Users,      label: "Concorrentes" },
   { slug: "meetings",    icon: NotebookPen, label: "Reuniões" },
+  { slug: "video",       icon: Film,       label: "Vídeo" },
   { slug: "icp",         icon: FileText,   label: "ICP" },
   { slug: "palette",     icon: Palette,    label: "Paleta" },
   { slug: "settings",    icon: Settings,   label: "Config." },

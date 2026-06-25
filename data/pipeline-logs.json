@@ -1,5 +1,55 @@
 [
   {
+    "id": "1781097280368",
+    "date": "2026-06-10T13:14:40.368Z",
+    "job": "calendar",
+    "clientId": "tiago-zamboni",
+    "clientName": "Tiago Zamboni",
+    "status": "error",
+    "message": "Trello error 400: {\"message\":\"invalid value for name\",\"error\":\"ERROR\"}",
+    "durationMs": 122534
+  },
+  {
+    "id": "1781097123879",
+    "date": "2026-06-10T13:12:03.879Z",
+    "job": "calendar",
+    "clientId": "isabela-castro",
+    "clientName": "Isabela Castro",
+    "status": "error",
+    "message": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"The request body is not valid JSON: no low surrogate in string: line 1 column 4233 (char 4232)\"},\"request_id\":\"req_011Cbue5MMxsNxUUkespheEL\"}",
+    "durationMs": 156485
+  },
+  {
+    "id": "1781096981795",
+    "date": "2026-06-10T13:09:41.795Z",
+    "job": "calendar",
+    "clientId": "sam-fernandes",
+    "clientName": "Sam Fernandes",
+    "status": "error",
+    "message": "Trello error 400: {\"message\":\"invalid value for name\",\"error\":\"ERROR\"}",
+    "durationMs": 142081
+  },
+  {
+    "id": "1781096848750",
+    "date": "2026-06-10T13:07:28.750Z",
+    "job": "calendar",
+    "clientId": "victor-hugo-ferro",
+    "clientName": "Victor Hugo Ferro",
+    "status": "error",
+    "message": "Trello error 400: {\"message\":\"invalid value for name\",\"error\":\"ERROR\"}",
+    "durationMs": 133043
+  },
+  {
+    "id": "1781096725736",
+    "date": "2026-06-10T13:05:25.736Z",
+    "job": "calendar",
+    "clientId": "lais-daltrozo",
+    "clientName": "Laís Daltrozo",
+    "status": "error",
+    "message": "Trello error 400: {\"message\":\"invalid value for name\",\"error\":\"ERROR\"}",
+    "durationMs": 123013
+  },
+  {
     "id": "1781051657923",
     "date": "2026-06-10T00:34:17.923Z",
     "job": "metrics",

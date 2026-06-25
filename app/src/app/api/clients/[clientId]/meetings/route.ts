@@ -22,9 +22,9 @@ function readMeetings(): Meeting[] {
 /**
  * GET /api/clients/[clientId]/meetings
  *
- * Returns only meetings whose title explicitly includes the client's name
- * (e.g. "Sam x Clique Boost", "Bela x Clique Boost").
- * This ensures internal team meetings don't appear in client profiles.
+ * Returns meetings that have this client's ID in their clientIds array.
+ * The clientIds are set correctly during Granola sync (Claude-side), so
+ * we trust that array rather than re-parsing the title.
  */
 export async function GET(
   _req: NextRequest,
@@ -32,23 +32,9 @@ export async function GET(
 ) {
   const { clientId } = await params;
 
-  // Build name variants to search in the title
-  // e.g. clientId "sam-fernandes" → "sam"
-  // We also read the stored client name for full-name matching
-  const nameParts = clientId.split("-").map((p) => p.toLowerCase());
-  const firstNameSlug = nameParts[0]; // e.g. "sam", "bela", "lais", "tiago"
-
   const all = readMeetings();
   const meetings = all
-    .filter((m) => {
-      const titleLower = m.title.toLowerCase();
-      // Must mention the client name in the title
-      return (
-        m.clientIds.includes(clientId) &&
-        (titleLower.includes(firstNameSlug) ||
-          nameParts.some((part) => part.length > 3 && titleLower.includes(part)))
-      );
-    })
+    .filter((m) => m.clientIds.includes(clientId))
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return NextResponse.json({ meetings, total: meetings.length });
