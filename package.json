@@ -1,0 +1,25 @@
+{
+  "name": "social-media-clique-boost",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=packages/web",
+    "dev:api": "npm run dev --workspace=packages/api",
+    "dev:all": "concurrently \"npm run dev:api\" \"npm run dev\"",
+    "build": "npm run build --workspace=packages/api && npm run build --workspace=packages/web",
+    "pipeline": "npm run pipeline --workspace=packages/api",
+    "weekly-refresh": "npm run weekly-refresh --workspace=packages/api",
+    "test-icp": "npm run test-icp --workspace=packages/api",
+    "test-palette": "npm run test-palette --workspace=packages/api",
+    "test-calendar": "npm run test-calendar --workspace=packages/api",
+    "test-meta": "npm run test-meta --workspace=packages/api",
+    "test-onboarding": "npm run test-onboarding --workspace=packages/api",
+    "test-sheets": "npm run test-sheets --workspace=packages/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

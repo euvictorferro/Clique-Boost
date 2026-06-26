@@ -1,0 +1,33 @@
+{
+  "folders": [
+    {
+      "name": "Web (Frontend)",
+      "path": "packages/web"
+    },
+    {
+      "name": "API (Backend)",
+      "path": "packages/api"
+    },
+    {
+      "name": "Shared (Tipos)",
+      "path": "packages/shared"
+    },
+    {
+      "name": "Raiz do Projeto",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "typescript.tsdk": "packages/web/node_modules/typescript/lib",
+    "editor.formatOnSave": true,
+    "typescript.preferences.importModuleSpecifier": "non-relative"
+  },
+  "extensions": {
+    "recommendations": [
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode",
+      "bradlc.vscode-tailwindcss",
+      "ms-vscode.vscode-typescript-next"
+    ]
+  }
+}
