@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getClient } from "@/lib/clients";
-import { readNote, getClientPath } from "@/lib/obsidian";
-import { readdirSync } from "fs";
-import path from "path";
+import { readNoteAsync } from "@/lib/obsidian";
+import { supabase } from "@/lib/supabase";
 
-function listAvailableMonths(clientId: string): string[] {
-  const months = new Set<string>();
-  try {
-    const estrategiaDir = path.join(getClientPath(clientId), "Estratégia");
-    const files = readdirSync(estrategiaDir);
-    for (const file of files) {
-      const m = file.match(/-((\d{4})-(\d{2}))\.md$/);
-      if (m) months.add(m[1]);
-    }
-  } catch { /* pasta pode não existir ainda */ }
-  return Array.from(months).sort().reverse();
+async function listAvailableMonths(clientId: string): Promise<string[]> {
+  const { data } = await supabase
+    .from("client_documents")
+    .select("month")
+    .eq("client_id", clientId)
+    .eq("doc_type", "calendar")
+    .not("month", "is", null)
+    .order("month", { ascending: false });
+  return (data ?? []).map((r: { month: string }) => r.month).filter(Boolean);
 }
 
 export async function GET(
@@ -25,11 +22,13 @@ export async function GET(
   const client = await getClient(clientId);
   if (!client) return NextResponse.json({ error: "not found" }, { status: 404 });
 
-  const strategy = readNote(clientId, "estrategia-conteudo.md") ?? "";
-  const funnel   = readNote(clientId, "funil-organico.md") ?? "";
-  const mindmap  = readNote(clientId, "mapa-mental.md") ?? "";
+  const [strategy, funnel, mindmap, availableMonths] = await Promise.all([
+    readNoteAsync(clientId, "estrategia-conteudo.md").then(v => v ?? ""),
+    readNoteAsync(clientId, "funil-organico.md").then(v => v ?? ""),
+    readNoteAsync(clientId, "mapa-mental.md").then(v => v ?? ""),
+    listAvailableMonths(clientId),
+  ]);
 
-  const availableMonths = listAvailableMonths(clientId);
   const hasStrategy = !!(strategy || funnel || mindmap);
 
   return NextResponse.json({ strategy, funnel, mindmap, hasStrategy, availableMonths, month: null });

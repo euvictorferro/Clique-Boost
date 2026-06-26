@@ -1,7 +1,7 @@
 import { Client, ContentCalendar, ContentPost, InstagramPost } from "@clique-boost/shared";
 import { getViralPosts, getViralPostsByNiche } from "./apify";
 import { callClaude } from "./claude";
-import { readNote, writeCalendar } from "./obsidian";
+import { readNoteAsync, writeCalendar } from "./obsidian";
 import { upsertClient, getClient } from "./clients";
 import { getAllCopySkills } from "../prompts/copySkills";
 
@@ -120,10 +120,12 @@ export async function generateMonthlyCalendar(
 ): Promise<ContentCalendar> {
   console.log(`📅 Gerando calendário ${month} para ${client.name}...`);
 
-  // Buscar ICP, estratégia e voz do cliente do Obsidian
-  const icpContent = readNote(client.id, "ICP.md") ?? "ICP não disponível";
-  const strategyContent = readNote(client.id, "estrategia-conteudo.md") ?? "";
-  const vozContent = readNote(client.id, "voz.md") ?? "";
+  // Buscar ICP, estratégia e voz do cliente (Supabase → GitHub → local)
+  const [icpContent, strategyContent, vozContent] = await Promise.all([
+    readNoteAsync(client.id, "ICP.md").then(v => v ?? "ICP não disponível"),
+    readNoteAsync(client.id, "estrategia-conteudo.md").then(v => v ?? ""),
+    readNoteAsync(client.id, "voz.md").then(v => v ?? ""),
+  ]);
 
   // Scraping de concorrentes ou pesquisa de mercado por nicho
   let viralPosts: InstagramPost[] = [];

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getClient } from "@/lib/clients";
-import { readNote, writeNote } from "@/lib/obsidian";
+import { readNoteAsync, writeNote } from "@/lib/obsidian";
 
 export async function GET(
   _req: NextRequest,
@@ -10,7 +10,7 @@ export async function GET(
   const client = await getClient(clientId);
   if (!client) return NextResponse.json({ error: "not found" }, { status: 404 });
 
-  const content = readNote(clientId, "ICP.md") ?? "";
+  const content = await readNoteAsync(clientId, "ICP.md") ?? "";
   return NextResponse.json({ content });
 }
 
