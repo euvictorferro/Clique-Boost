@@ -17,6 +17,9 @@ export interface Client {
   obsidianPath: string;
   trelloBoardId?: string;
   metaAccessToken?: string;
+  metaTokenExpiresAt?: string;
+  adAccountId?: string;
+  supabaseUserId?: string;
   createdAt: string;
   status: ClientStatus;
   profilePictureUrl?: string;

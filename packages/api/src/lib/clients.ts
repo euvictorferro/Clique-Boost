@@ -1,32 +1,94 @@
-import fs from "fs";
-import path from "path";
 import { Client } from "@clique-boost/shared";
+import { supabase } from "./supabase";
 
-const DATA_PATH = path.join(process.cwd(), "..", "..", "data", "clients.json");
+// ─── Row mapping ──────────────────────────────────────────────────────────────
 
-export function readClients(): Client[] {
-  if (!fs.existsSync(DATA_PATH)) return [];
-  return JSON.parse(fs.readFileSync(DATA_PATH, "utf-8")) as Client[];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToClient(row: any): Client {
+  return {
+    id: row.id,
+    name: row.name,
+    brandName: row.brand_name,
+    niche: row.niche,
+    instagramHandle: row.instagram_handle ?? undefined,
+    competitors: row.competitors ?? [],
+    socialNetworks: row.social_networks ?? [],
+    toneOfVoice: row.tone_of_voice ?? "",
+    contentGoal: row.content_goal ?? "",
+    hasVisualIdentity: row.has_visual_identity ?? false,
+    brandColors: row.brand_colors ?? undefined,
+    obsidianPath: "",  // mantido por compatibilidade — não usado como storage
+    trelloBoardId: row.trello_board_id ?? undefined,
+    metaAccessToken: row.meta_access_token ?? undefined,
+    metaTokenExpiresAt: row.meta_token_expires_at ?? undefined,
+    profilePictureUrl: row.profile_picture_url ?? undefined,
+    status: row.status ?? "active",
+    createdAt: row.created_at,
+    supabaseUserId: row.supabase_user_id ?? undefined,
+  };
 }
 
-export function writeClients(clients: Client[]): void {
-  fs.mkdirSync(path.dirname(DATA_PATH), { recursive: true });
-  fs.writeFileSync(DATA_PATH, JSON.stringify(clients, null, 2), "utf-8");
+function clientToRow(client: Client): Record<string, unknown> {
+  return {
+    id: client.id,
+    name: client.name,
+    brand_name: client.brandName,
+    niche: client.niche,
+    instagram_handle: client.instagramHandle ?? null,
+    competitors: client.competitors,
+    social_networks: client.socialNetworks,
+    tone_of_voice: client.toneOfVoice,
+    content_goal: client.contentGoal,
+    has_visual_identity: client.hasVisualIdentity,
+    brand_colors: client.brandColors ?? null,
+    trello_board_id: client.trelloBoardId ?? null,
+    meta_access_token: client.metaAccessToken ?? null,
+    meta_token_expires_at: client.metaTokenExpiresAt ?? null,
+    profile_picture_url: client.profilePictureUrl ?? null,
+    status: client.status,
+    supabase_user_id: client.supabaseUserId ?? null,
+    updated_at: new Date().toISOString(),
+  };
 }
 
-export function getClient(id: string): Client | undefined {
-  return readClients().find((c) => c.id === id);
+// ─── Public API ───────────────────────────────────────────────────────────────
+
+export async function readClients(): Promise<Client[]> {
+  const { data, error } = await supabase
+    .from("clients")
+    .select("*")
+    .order("created_at", { ascending: true });
+  if (error) throw new Error(`readClients: ${error.message}`);
+  return (data ?? []).map(rowToClient);
 }
 
-export function upsertClient(client: Client): void {
-  const clients = readClients();
-  const idx = clients.findIndex((c) => c.id === client.id);
-  if (idx >= 0) {
-    clients[idx] = client;
-  } else {
-    clients.push(client);
-  }
-  writeClients(clients);
+export async function getClient(id: string): Promise<Client | undefined> {
+  const { data, error } = await supabase
+    .from("clients")
+    .select("*")
+    .eq("id", id)
+    .single();
+  if (error?.code === "PGRST116") return undefined; // not found
+  if (error) throw new Error(`getClient(${id}): ${error.message}`);
+  return rowToClient(data);
+}
+
+export async function upsertClient(client: Client): Promise<void> {
+  const { error } = await supabase
+    .from("clients")
+    .upsert(clientToRow(client), { onConflict: "id" });
+  if (error) throw new Error(`upsertClient(${client.id}): ${error.message}`);
+}
+
+export async function updateClientField(
+  id: string,
+  fields: Record<string, unknown>
+): Promise<void> {
+  const { error } = await supabase
+    .from("clients")
+    .update({ ...fields, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw new Error(`updateClientField(${id}): ${error.message}`);
 }
 
 export function slugify(name: string): string {
