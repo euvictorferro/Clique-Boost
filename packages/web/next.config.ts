@@ -1,8 +1,4 @@
 import type { NextConfig } from "next";
-import path from "path";
-import { config } from "dotenv";
-
-config({ path: path.join(__dirname, "..", "..", ".env") });
 
 const API_URL = process.env.API_URL || "http://localhost:3001";
 
