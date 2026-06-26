@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFileSync } from "fs";
 import path from "path";
-import { readClients } from "@/lib/clients";
+import { getClient } from "@/lib/clients";
 import { getBoardCards, TrelloCard, TrelloList } from "@/lib/trello";
 
 const OBSIDIAN_VAULT_PATH = process.env.OBSIDIAN_VAULT_PATH ?? "";
@@ -165,7 +165,7 @@ export async function GET(
   const rawMonth = searchParams.get("month") ?? new Date().toISOString().slice(0, 7);
   const month = /^\d{4}-\d{2}$/.test(rawMonth) ? rawMonth : new Date().toISOString().slice(0, 7);
 
-  const client = readClients().find((c) => c.id === clientId);
+  const client = await getClient(clientId);
   if (!client) return NextResponse.json({ error: "not found" }, { status: 404 });
 
   // 1. Tenta Trello se o cliente tiver boardId

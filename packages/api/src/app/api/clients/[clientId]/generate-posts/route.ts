@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import path from "path";
-import { readClients } from "@/lib/clients";
+import { getClient } from "@/lib/clients";
 import { generateWeekPosts, GeneratedPost } from "@/lib/postGenerator";
 
 const DATA_DIR = path.join(process.cwd(), "..", "..", "data");
@@ -57,7 +57,7 @@ export async function POST(
   { params }: { params: Promise<{ clientId: string }> }
 ) {
   const { clientId } = await params;
-  const client = readClients().find((c) => c.id === clientId);
+  const client = await getClient(clientId);
   if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
   const body = await req.json().catch(() => ({}));

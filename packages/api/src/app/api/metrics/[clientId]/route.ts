@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchClientInsights } from "@/lib/metaInsights";
-import { readClients } from "@/lib/clients";
+import { getClient } from "@/lib/clients";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ clientId: string }> }
 ) {
   const { clientId } = await params;
-  const clients = readClients();
-  const client = clients.find((c) => c.id === clientId);
+  
+  const client = await getClient(clientId);
 
   if (!client) {
     return NextResponse.json({ error: "Client not found" }, { status: 404 });

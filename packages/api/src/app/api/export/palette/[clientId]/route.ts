@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFileSync } from "fs";
 import path from "path";
-import { readClients } from "@/lib/clients";
+import { getClient } from "@/lib/clients";
 import { generatePalettePDF, PalettePageData } from "@/lib/pdf";
 
 function parsePalettes(markdown: string): PalettePageData[] {
@@ -35,7 +35,7 @@ export async function GET(
   { params }: { params: Promise<{ clientId: string }> }
 ) {
   const { clientId } = await params;
-  const client = readClients().find((c) => c.id === clientId);
+  const client = await getClient(clientId);
   if (!client) return NextResponse.json({ error: "not found" }, { status: 404 });
 
   let markdown = "";

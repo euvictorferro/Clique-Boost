@@ -4,7 +4,7 @@ import { config } from "dotenv";
 config({ path: path.join(__dirname, "../../.env") });
 
 import { onboardClient } from "../src/lib/onboarding";
-import { BriefingResponse } from "../src/lib/types";
+import { BriefingResponse } from "@clique-boost/shared";
 
 const mockBriefing: BriefingResponse = {
   clientName: "Laís Daltrozo",

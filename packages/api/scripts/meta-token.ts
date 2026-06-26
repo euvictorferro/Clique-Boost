@@ -69,7 +69,7 @@ async function getInstagramAccountToken(pageToken: string): Promise<string> {
 }
 
 async function main() {
-  const client = getClient(clientId);
+  const client = await getClient(clientId);
   if (!client) {
     console.error(`Cliente não encontrado: ${clientId}`);
     process.exit(1);
@@ -86,7 +86,7 @@ async function main() {
 
     const finalToken = await getInstagramAccountToken(longToken);
 
-    upsertClient({ ...client, metaAccessToken: finalToken });
+    await upsertClient({ ...client, metaAccessToken: finalToken });
     console.log(`\n✅ Token salvo para ${client.name}`);
     console.log(`Agora você pode rodar: npm run test-meta ${clientId}\n`);
   } catch (err) {

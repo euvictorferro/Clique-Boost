@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readClients } from "@/lib/clients";
+import { getClient } from "@/lib/clients";
 import { readNote, getClientPath } from "@/lib/obsidian";
 import { readdirSync } from "fs";
 import path from "path";
@@ -22,7 +22,7 @@ export async function GET(
   { params }: { params: Promise<{ clientId: string }> }
 ) {
   const { clientId } = await params;
-  const client = readClients().find((c) => c.id === clientId);
+  const client = await getClient(clientId);
   if (!client) return NextResponse.json({ error: "not found" }, { status: 404 });
 
   const strategy = readNote(clientId, "estrategia-conteudo.md") ?? "";

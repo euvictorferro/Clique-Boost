@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import path from "path";
-import { readClients, upsertClient } from "@/lib/clients";
+import { getClient, upsertClient } from "@/lib/clients";
 import { scrapeRecentPosts } from "@/lib/apify";
 import { writeNote } from "@/lib/obsidian";
 
@@ -112,7 +112,7 @@ export async function GET(
   { params }: { params: Promise<{ clientId: string }> }
 ) {
   const { clientId } = await params;
-  const client = readClients().find((c) => c.id === clientId);
+  const client = await getClient(clientId);
   const cache = readCache(clientId);
 
   return NextResponse.json({
@@ -128,7 +128,7 @@ export async function PATCH(
   { params }: { params: Promise<{ clientId: string }> }
 ) {
   const { clientId } = await params;
-  const client = readClients().find((c) => c.id === clientId);
+  const client = await getClient(clientId);
   if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
   const body = await req.json();
@@ -164,7 +164,7 @@ export async function POST(
   { params }: { params: Promise<{ clientId: string }> }
 ) {
   const { clientId } = await params;
-  const client = readClients().find((c) => c.id === clientId);
+  const client = await getClient(clientId);
   if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
   const competitors: string[] = client.competitors ?? [];

@@ -177,7 +177,7 @@ export async function generateMonthlyCalendar(
 }
 
 export async function refreshWeeklyTopics(clientId: string): Promise<void> {
-  const client = getClient(clientId);
+  const client = await getClient(clientId);
   if (!client) throw new Error(`Cliente não encontrado: ${clientId}`);
 
   const now = new Date();

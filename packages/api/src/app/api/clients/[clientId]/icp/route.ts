@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readClients } from "@/lib/clients";
+import { getClient } from "@/lib/clients";
 import { readNote, writeNote } from "@/lib/obsidian";
 
 export async function GET(
@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ clientId: string }> }
 ) {
   const { clientId } = await params;
-  const client = readClients().find((c) => c.id === clientId);
+  const client = await getClient(clientId);
   if (!client) return NextResponse.json({ error: "not found" }, { status: 404 });
 
   const content = readNote(clientId, "ICP.md") ?? "";
@@ -19,7 +19,7 @@ export async function POST(
   { params }: { params: Promise<{ clientId: string }> }
 ) {
   const { clientId } = await params;
-  const client = readClients().find((c) => c.id === clientId);
+  const client = await getClient(clientId);
   if (!client) return NextResponse.json({ error: "not found" }, { status: 404 });
 
   const body = await req.json();

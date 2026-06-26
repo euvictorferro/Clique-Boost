@@ -164,7 +164,7 @@ export async function onboardClient(briefing: BriefingResponse): Promise<Client>
     status: "onboarding",
   };
 
-  upsertClient(client);
+  await upsertClient(client);
   console.log(`✅ Cliente onboardado: ${client.name} (${client.id})`);
   return client;
 }

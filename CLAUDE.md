@@ -1,6 +1,56 @@
 # Social Media Clique Boost
 
-Sistema de gerenciamento de social media para clientes da Clique Boost. Automatiza onboarding, geração de ICP, paleta de cores, calendário estratégico de conteúdo e coleta de métricas Meta.
+Ferramenta interna da Clique Boost para gestão de clientes de agência (social media + tráfego pago). Automatiza o ciclo completo: onboarding → Brand Guidelines → estratégia → calendário de conteúdo → acompanhamento de resultados.
+
+**Uso:** interno da agência primeiro. Comercialização é horizonte futuro, não escopo atual.
+
+**Duas interfaces:**
+- `/(agency)` — painel interno da equipe Clique Boost (todos os clientes)
+- `/(client)` — portal do cliente (login individual, só vê os próprios dados)
+
+## Visão do Produto — 4 Fases
+
+### Fase 1: Onboarding Automatizado
+Google Forms preenchido → sistema detecta automaticamente → gera ICP + paleta + tipografia + tom de voz → gera Brand Guidelines PDF → salva no Obsidian.
+
+### Fase 2: Estratégia
+Análise de concorrentes (orgânico via Apify) + funil completo com copy não-genérica + calendário estratégico com ganchos e CTAs personalizados por cliente.
+
+### Fase 3: Execução
+Calendário de conteúdo mensal, cards no Trello por semana, estrutura de campanhas de tráfego pago com orçamento definido pelo cliente.
+
+### Fase 4: Acompanhamento
+Dashboard de métricas: orgânico (Meta Graph API) + pago (Meta Ads Manager). Sugestões de otimização baseadas em performance real.
+
+## Roadmap MVP (ordem de sprints)
+
+| Sprint | Entrega | Dependências |
+|---|---|---|
+| 1 | Auth com Clerk (roles: agency + client) | — |
+| 2 | Brand Guidelines completo (tipografia + tom de voz + PDF) | — |
+| 3 | Meta Ads Manager (métricas pagas) | Sprint 1 |
+| 4 | Dashboard do cliente (portal de login) | Sprints 1 + 3 |
+
+## Arquitetura de Rotas (packages/web)
+
+```
+/app/
+  /(agency)/          ← dashboard interno (protegido: role agency)
+    page.tsx          ← visão geral de todos os clientes
+    clients/[id]/     ← gestão individual do cliente
+  /(client)/          ← portal do cliente (protegido: role client)
+    login/            ← email + senha via Clerk
+    dashboard/        ← métricas do cliente autenticado
+  /api/               ← rotas compartilhadas
+```
+
+## Auth — Clerk
+
+- Biblioteca: `@clerk/nextjs`
+- Roles: `agency` (equipe CB) | `client` (cada cliente)
+- Middleware: `packages/web/src/middleware.ts`
+- Mapeamento: `clerkUserId` associado ao `clientId` em `data/clients.json`
+- Cliente A não pode ver dados do cliente B — enforçado no middleware
 
 ## Path do Projeto
 ```
@@ -66,21 +116,37 @@ Copie `.env.example` para `.env` (na raiz do projeto, não dentro de `app/`).
 - Meta Graph API (métricas orgânicas)
 - Obsidian (filesystem direto via iCloud)
 
-## Módulos (src/lib/)
-| Arquivo | Função |
-|---|---|
-| `googleSheets.ts` | Puxa e marca briefings novos |
-| `onboarding.ts` | Cria cliente no sistema e no Obsidian |
-| `icp.ts` | Gera ICP via Claude e salva no Obsidian |
-| `palette.ts` | Gera 10 paletas ou registra identidade existente |
-| `contentCalendar.ts` | Gera calendário mensal + refresh semanal |
-| `trello.ts` | Cria board e cards por semana |
-| `metaInsights.ts` | Busca métricas orgânicas via Meta Graph API |
-| `obsidian.ts` | Helpers para leitura/escrita no vault |
-| `clients.ts` | CRUD de data/clients.json |
-| `claude.ts` | Wrapper do Claude API |
-| `apify.ts` | Scraping de posts do Instagram |
-| `types.ts` | Interfaces TypeScript centrais |
+## Módulos (packages/api/src/lib/)
+
+### Existentes (não reescrever)
+| Arquivo | Função | Status |
+|---|---|---|
+| `googleSheets.ts` | Puxa e marca briefings novos | ✅ |
+| `onboarding.ts` | Cria cliente no sistema e no Obsidian | ✅ |
+| `icp.ts` | Gera ICP via Claude e salva no Obsidian | ✅ |
+| `palette.ts` | Gera 10 paletas ou registra identidade existente | ✅ |
+| `contentCalendar.ts` | Gera calendário mensal + refresh semanal | ✅ |
+| `trello.ts` | Cria board e cards por semana | ✅ |
+| `metaInsights.ts` | Métricas **orgânicas** via Meta Graph API | ✅ orgânico only |
+| `apify.ts` | Scraping **orgânico** de concorrentes (Instagram) | ✅ orgânico only |
+| `obsidian.ts` | Helpers para leitura/escrita no vault | ✅ |
+| `clients.ts` | CRUD de data/clients.json | ✅ |
+| `claude.ts` | Wrapper do Claude API | ✅ |
+| `pdf.ts` | PDF de paleta básico (jsPDF) | ✅ base existe |
+| `types.ts` | Interfaces TypeScript centrais | ✅ |
+
+### A criar (MVP)
+| Arquivo | Função | Sprint |
+|---|---|---|
+| `typography.ts` | Geração de tipografia via Claude (Google Fonts) | 2 |
+| `brandVoice.ts` | Geração de tom de voz via Claude | 2 |
+| `metaAds.ts` | Métricas **pagas** via Meta Ads Manager API | 3 |
+
+### Atualizar
+| Arquivo | O que muda | Sprint |
+|---|---|---|
+| `pdf.ts` | Adicionar `generateBrandGuidelinesPDF()` com tipografia + tom de voz | 2 |
+| `types.ts` | Adicionar campos `adAccountId`, `clerkUserId`, `brandVoice`, `typography` no tipo `Client` | 1-2 |
 
 ## Paletas de Cores Predefinidas
 
@@ -135,3 +201,24 @@ Ao gerar `paleta.md` para um cliente:
 - `GOOGLE_SHEETS_ID_CORRETOR` — ID da planilha Corretor
 - `TRELLO_API_KEY` + `TRELLO_TOKEN`
 - `META_APP_ID` + `META_APP_SECRET`
+- `CLERK_SECRET_KEY` + `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` — Auth (Sprint 1)
+- `META_ADS_ACCOUNT_ID` — por cliente em `data/clients.json` campo `adAccountId` (Sprint 3)
+
+## Vault Obsidian — Documentos por Cliente
+
+Cada cliente tem pasta em `/01 - Clientes/<clientId>/`:
+
+```
+briefing.md             ← briefing do cliente
+ICP.md                  ← perfil do cliente ideal
+paleta.md               ← paleta de cores escolhida
+brand-guidelines.md     ← tipografia + tom de voz + diretrizes (Sprint 2)
+estrategia-conteudo.md  ← estratégia e pilares
+funil-organico.md       ← funil de conversão
+mapa-mental.md          ← formatos virais + ganchos + temas
+concorrentes.md         ← análise de concorrentes
+```
+
+Calendários: `/03 - Calendários/<clientId>-YYYY-MM.md`
+
+Conversas de desenvolvimento com Claude: `/00 - Dev/conversas-claude/`

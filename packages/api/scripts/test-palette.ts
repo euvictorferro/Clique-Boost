@@ -8,7 +8,7 @@ import { getClient } from "../src/lib/clients";
 
 async function main() {
   const clientId = process.argv[2] ?? "lais-daltrozo";
-  const client = getClient(clientId);
+  const client = await getClient(clientId);
 
   if (!client) {
     console.error(`❌ Cliente "${clientId}" não encontrado.`);
@@ -29,7 +29,7 @@ async function main() {
     toneOfVoice: client.toneOfVoice,
     contentGoal: client.contentGoal,
     rawData: {},
-  } as import("../src/lib/types").BriefingResponse;
+  } as import("@clique-boost/shared").BriefingResponse;
 
   const result = await generatePalette(client, mockBriefing);
 

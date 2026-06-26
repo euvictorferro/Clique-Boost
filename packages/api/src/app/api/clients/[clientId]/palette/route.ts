@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFileSync, existsSync } from "fs";
 import path from "path";
-import { readClients } from "@/lib/clients";
+import { getClient } from "@/lib/clients";
 
 export interface ColorSwatch {
   hex: string;
@@ -13,7 +13,7 @@ export async function GET(
   { params }: { params: Promise<{ clientId: string }> }
 ) {
   const { clientId } = await params;
-  const client = readClients().find((c) => c.id === clientId) as any;
+  const client = await getClient(clientId) as any;
   if (!client) return NextResponse.json({ error: "not found" }, { status: 404 });
 
   // Structured swatches from clients.json (populated from brand PDFs)

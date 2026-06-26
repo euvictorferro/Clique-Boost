@@ -79,13 +79,13 @@ const server = http.createServer(async (req, res) => {
   console.log(`✅ Token longo obtido (válido por ~${days} dias)`);
 
   // Salva token direto no cliente
-  const client = getClient(clientId);
+  const client = await getClient(clientId);
   if (client) {
-    upsertClient({ ...client, metaAccessToken: longData.access_token });
+    await upsertClient({ ...client, metaAccessToken: longData.access_token });
     console.log(`✅ Token salvo para ${client.name}`);
     console.log(`\nAgora rode: npm run test-meta ${clientId}\n`);
   } else {
-    console.log(`⚠️  Cliente ${clientId} não encontrado em clients.json`);
+    console.log(`⚠️  Cliente ${clientId} não encontrado`);
     console.log(`Token: ${longData.access_token}\n`);
   }
 });

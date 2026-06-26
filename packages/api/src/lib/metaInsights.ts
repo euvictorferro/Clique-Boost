@@ -254,7 +254,7 @@ export async function fetchClientInsights(client: Client, days = 30): Promise<Me
   // Persiste foto de perfil no clients.json para a sidebar
   if (profile.profile_picture_url) {
     try {
-      upsertClient({ ...client, profilePictureUrl: profile.profile_picture_url });
+      await upsertClient({ ...client, profilePictureUrl: profile.profile_picture_url });
     } catch { /* non-critical */ }
   }
 

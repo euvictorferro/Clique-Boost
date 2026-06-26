@@ -10,7 +10,7 @@ import { generatePalette } from "../src/lib/palette";
 import { generateMonthlyCalendar } from "../src/lib/contentCalendar";
 import { syncCalendarToTrello } from "../src/lib/trello";
 import { analyzeClientProfile } from "../src/lib/profileAnalysis";
-import { Niche } from "../src/lib/types";
+import { Niche } from "@clique-boost/shared";
 
 async function runForSheet(sheetId: string, niche: Niche) {
   const briefings = await fetchNewBriefings(sheetId, niche);

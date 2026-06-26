@@ -13,7 +13,7 @@ async function main() {
     process.exit(1);
   }
 
-  const client = getClient(clientId);
+  const client = await getClient(clientId);
   if (!client) {
     console.error(`❌ Cliente "${clientId}" não encontrado.`);
     process.exit(1);

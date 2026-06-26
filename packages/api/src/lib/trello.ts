@@ -87,7 +87,7 @@ export async function syncCalendarToTrello(
   if (!boardId) {
     console.log(`📋 Criando board Trello para ${client.brandName}...`);
     boardId = await createBoard(client.brandName);
-    upsertClient({ ...client, trelloBoardId: boardId });
+    await upsertClient({ ...client, trelloBoardId: boardId });
     console.log(`✅ Board criado: ${boardId}`);
   }
 

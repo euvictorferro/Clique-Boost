@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
   // Processa cada novo briefing em sequência
   for (const briefing of newBriefings) {
     const steps: string[] = [];
-    const logEntry = appendLog({
+    const logEntry = await appendLog({
       date: now.toISOString(),
       job: "calendar",
       clientId: briefing.clientName,
@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
         steps.push("✅ Calendário sincronizado com Trello");
       }
 
-      updateLog(logEntry.id, {
+      await updateLog(logEntry.id, {
         status: "success",
         message: `Pipeline completo para ${briefing.brandName}`,
         details: steps.map((s) => ({ label: s, value: "" })),
@@ -111,7 +111,7 @@ export async function GET(req: NextRequest) {
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erro desconhecido";
       steps.push(`❌ Falhou: ${message}`);
-      updateLog(logEntry.id, { status: "error", message });
+      await updateLog(logEntry.id, { status: "error", message });
       results.push({ client: briefing.brandName, steps, error: message });
       console.error(`❌ [cron/briefings] Erro em ${briefing.brandName}:`, err);
     }

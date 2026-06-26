@@ -29,13 +29,13 @@ const JOB_LABELS: Record<string, string> = {
 
 // ─── Métricas ────────────────────────────────────────────────────────────────
 async function runMetrics(clientId: string | undefined): Promise<void> {
-  const clients = readClients().filter(
+  const clients = (await readClients()).filter(
     (c) => c.metaAccessToken && (!clientId || c.id === clientId)
   );
 
   for (const client of clients) {
     const startMs = Date.now();
-    const entry = appendLog({
+    const entry = await appendLog({
       date: new Date().toISOString(),
       job: "metrics",
       clientId: client.id,
@@ -45,7 +45,7 @@ async function runMetrics(clientId: string | undefined): Promise<void> {
     });
     try {
       const insights = await fetchClientInsights(client, 30);
-      updateLog(entry.id, {
+      await updateLog(entry.id, {
         status: "success",
         durationMs: Date.now() - startMs,
         message: "Métricas coletadas com sucesso",
@@ -59,7 +59,7 @@ async function runMetrics(clientId: string | undefined): Promise<void> {
         ],
       });
     } catch (err) {
-      updateLog(entry.id, {
+      await updateLog(entry.id, {
         status: "error",
         durationMs: Date.now() - startMs,
         message: err instanceof Error ? err.message : "Erro desconhecido",
@@ -72,11 +72,11 @@ async function runMetrics(clientId: string | undefined): Promise<void> {
 async function runCalendar(clientId: string | undefined): Promise<void> {
   const now = new Date();
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  const clients = readClients().filter((c) => !clientId || c.id === clientId);
+  const clients = (await readClients()).filter((c) => !clientId || c.id === clientId);
 
   for (const client of clients) {
     const startMs = Date.now();
-    const entry = appendLog({
+    const entry = await appendLog({
       date: new Date().toISOString(),
       job: "calendar",
       clientId: client.id,
@@ -94,7 +94,7 @@ async function runCalendar(clientId: string | undefined): Promise<void> {
         trelloCount = calendar.posts.length;
       }
 
-      updateLog(entry.id, {
+      await updateLog(entry.id, {
         status: "success",
         durationMs: Date.now() - startMs,
         message: `Calendário gerado: ${calendar.posts.length} posts`,
@@ -106,7 +106,7 @@ async function runCalendar(clientId: string | undefined): Promise<void> {
         ],
       });
     } catch (err) {
-      updateLog(entry.id, {
+      await updateLog(entry.id, {
         status: "error",
         durationMs: Date.now() - startMs,
         message: err instanceof Error ? err.message : "Erro ao gerar calendário",
@@ -117,13 +117,13 @@ async function runCalendar(clientId: string | undefined): Promise<void> {
 
 // ─── Análise semanal ─────────────────────────────────────────────────────────
 async function runAnalysis(clientId: string | undefined): Promise<void> {
-  const clients = readClients().filter(
+  const clients = (await readClients()).filter(
     (c) => c.metaAccessToken && (!clientId || c.id === clientId)
   );
 
   for (const client of clients) {
     const startMs = Date.now();
-    const entry = appendLog({
+    const entry = await appendLog({
       date: new Date().toISOString(),
       job: "weekly-analysis",
       clientId: client.id,
@@ -133,7 +133,7 @@ async function runAnalysis(clientId: string | undefined): Promise<void> {
     });
     try {
       const result = await runWeeklyAnalysis(client);
-      updateLog(entry.id, {
+      await updateLog(entry.id, {
         status: "success",
         durationMs: Date.now() - startMs,
         message: `Análise concluída: ${result.postsAnalyzed} posts analisados`,
@@ -147,7 +147,7 @@ async function runAnalysis(clientId: string | undefined): Promise<void> {
         ],
       });
     } catch (err) {
-      updateLog(entry.id, {
+      await updateLog(entry.id, {
         status: "error",
         durationMs: Date.now() - startMs,
         message: err instanceof Error ? err.message : "Erro na análise",
@@ -158,11 +158,11 @@ async function runAnalysis(clientId: string | undefined): Promise<void> {
 
 // ─── Refresh semanal ─────────────────────────────────────────────────────────
 async function runRefresh(clientId: string | undefined): Promise<void> {
-  const clients = readClients().filter((c) => !clientId || c.id === clientId);
+  const clients = (await readClients()).filter((c) => !clientId || c.id === clientId);
 
   for (const client of clients) {
     const startMs = Date.now();
-    const entry = appendLog({
+    const entry = await appendLog({
       date: new Date().toISOString(),
       job: "weekly-refresh",
       clientId: client.id,
@@ -172,7 +172,7 @@ async function runRefresh(clientId: string | undefined): Promise<void> {
     });
     try {
       const result = await runWeeklyRefresh(client);
-      updateLog(entry.id, {
+      await updateLog(entry.id, {
         status: "success",
         durationMs: Date.now() - startMs,
         message: `Refresh concluído: ${result.postsReplaced + result.postsAdded} alterações`,
@@ -184,7 +184,7 @@ async function runRefresh(clientId: string | undefined): Promise<void> {
         ],
       });
     } catch (err) {
-      updateLog(entry.id, {
+      await updateLog(entry.id, {
         status: "error",
         durationMs: Date.now() - startMs,
         message: err instanceof Error ? err.message : "Erro no refresh",
@@ -199,11 +199,11 @@ async function runGeneratePosts(clientId: string | undefined, week?: number): Pr
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const nextWeekNum = week ?? Math.ceil((now.getDate() + 7) / 7);
   const dataDir = path.join(process.cwd(), "..", "..", "data");
-  const clients = readClients().filter((c) => !clientId || c.id === clientId);
+  const clients = (await readClients()).filter((c) => !clientId || c.id === clientId);
 
   for (const client of clients) {
     const startMs = Date.now();
-    const entry = appendLog({
+    const entry = await appendLog({
       date: new Date().toISOString(),
       job: "weekly-refresh",
       clientId: client.id,
@@ -220,7 +220,7 @@ async function runGeneratePosts(clientId: string | undefined, week?: number): Pr
       const outFile = path.join(outDir, `${client.id}-${month}-w${nextWeekNum}.json`);
       writeFileSync(outFile, JSON.stringify(posts, null, 2), "utf-8");
 
-      updateLog(entry.id, {
+      await updateLog(entry.id, {
         status: "success",
         durationMs: Date.now() - startMs,
         message: `${posts.length} posts gerados para Semana ${nextWeekNum}`,
@@ -232,7 +232,7 @@ async function runGeneratePosts(clientId: string | undefined, week?: number): Pr
         ],
       });
     } catch (err) {
-      updateLog(entry.id, {
+      await updateLog(entry.id, {
         status: "error",
         durationMs: Date.now() - startMs,
         message: err instanceof Error ? err.message : "Erro ao gerar posts",

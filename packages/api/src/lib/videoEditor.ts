@@ -40,7 +40,7 @@ function readyPath(clientId: string, filename: string) {
 
 /** Retorna nicho do cliente para escolher a música */
 async function getClientNiche(clientId: string): Promise<string> {
-  const clients = readClients();
+  const clients = await readClients();
   const client = clients.find((c) => c.id === clientId);
   return client?.niche ?? "general";
 }

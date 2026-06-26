@@ -17,7 +17,8 @@
     "test-calendar": "npm run test-calendar --workspace=packages/api",
     "test-meta": "npm run test-meta --workspace=packages/api",
     "test-onboarding": "npm run test-onboarding --workspace=packages/api",
-    "test-sheets": "npm run test-sheets --workspace=packages/api"
+    "test-sheets": "npm run test-sheets --workspace=packages/api",
+    "migrate:supabase": "npx tsx scripts/migrate-to-supabase.ts"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

@@ -9,7 +9,7 @@ import { refreshWeeklyTopics } from "../src/lib/contentCalendar";
 async function main() {
   console.log("🔄 Weekly refresh — atualizando tópicos de todos os clientes ativos\n");
 
-  const clients = readClients().filter((c) => c.status === "active");
+  const clients = (await readClients()).filter((c) => c.status === "active");
   if (clients.length === 0) {
     console.log("Nenhum cliente ativo encontrado.");
     return;
