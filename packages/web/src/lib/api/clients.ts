@@ -25,6 +25,10 @@ function rowToClient(row: any): Client {
     status: row.status ?? "active",
     createdAt: row.created_at,
     supabaseUserId: row.supabase_user_id ?? undefined,
+    planId: row.plan_id ?? undefined,
+    paymentStatus: row.payment_status ?? undefined,
+    paymentProofUrl: row.payment_proof_url ?? undefined,
+    paymentConfirmedAt: row.payment_confirmed_at ?? undefined,
   };
 }
 
@@ -47,6 +51,9 @@ function clientToRow(client: Client): Record<string, unknown> {
     profile_picture_url: client.profilePictureUrl ?? null,
     status: client.status,
     supabase_user_id: client.supabaseUserId ?? null,
+    ...(client.planId !== undefined && { plan_id: client.planId }),
+    ...(client.paymentStatus !== undefined && { payment_status: client.paymentStatus }),
+    ...(client.paymentProofUrl !== undefined && { payment_proof_url: client.paymentProofUrl }),
     updated_at: new Date().toISOString(),
   };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserPlus } from "lucide-react";
 
@@ -10,6 +10,12 @@ const NICHES = [
   { value: "general", label: "Geral" },
 ];
 
+type PlanOption = {
+  id: string;
+  name: string;
+  description?: string;
+};
+
 type FormState = {
   name: string;
   brandName: string;
@@ -17,12 +23,15 @@ type FormState = {
   instagramHandle: string;
   toneOfVoice: string;
   contentGoal: string;
+  planId: string;
 };
 
 export default function NewClientPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [plans, setPlans] = useState<PlanOption[]>([]);
+  const [proofFile, setProofFile] = useState<File | null>(null);
 
   const [form, setForm] = useState<FormState>({
     name: "",
@@ -31,7 +40,15 @@ export default function NewClientPage() {
     instagramHandle: "",
     toneOfVoice: "",
     contentGoal: "",
+    planId: "",
   });
+
+  useEffect(() => {
+    fetch("/api/plans")
+      .then((res) => res.json())
+      .then((data) => setPlans(data.plans ?? []))
+      .catch(() => setPlans([]));
+  }, []);
 
   const set =
     (key: keyof FormState) =>
@@ -44,10 +61,13 @@ export default function NewClientPage() {
     setSaving(true);
 
     try {
+      const formData = new FormData();
+      Object.entries(form).forEach(([key, value]) => formData.append(key, value));
+      if (proofFile) formData.append("paymentProof", proofFile);
+
       const res = await fetch("/api/clients/new", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: formData,
       });
 
       const data = await res.json();
@@ -151,6 +171,44 @@ export default function NewClientPage() {
               rows={2}
               className={`${inputClass} resize-none`}
             />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e5e5e5] p-5 flex flex-col gap-4">
+          <h2 className="text-sm font-semibold text-[#111]">Plano e Pagamento</h2>
+
+          <div>
+            <label className="block text-xs font-medium text-[#555] mb-1">
+              Plano contratado
+            </label>
+            <select value={form.planId} onChange={set("planId")} className={inputClass}>
+              <option value="">Selecionar depois</option>
+              {plans.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+            {form.planId && (
+              <p className="text-[11px] text-[#888] mt-1">
+                {plans.find((p) => p.id === form.planId)?.description}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-[#555] mb-1">
+              Comprovante de pagamento (imagem ou PDF)
+            </label>
+            <input
+              type="file"
+              accept="image/*,.pdf"
+              onChange={(e) => setProofFile(e.target.files?.[0] ?? null)}
+              className="w-full text-xs text-[#555] file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border file:border-[#e5e5e5] file:bg-white file:text-xs file:text-[#555] hover:file:border-[#8b5cf6]"
+            />
+            <p className="text-[11px] text-[#888] mt-1">
+              {proofFile
+                ? `Selecionado: ${proofFile.name} — o cliente entra como "comprovante enviado" até você confirmar.`
+                : "Sem comprovante, o cliente fica como pagamento pendente e o pipeline não roda pra ele."}
+            </p>
           </div>
         </div>
 

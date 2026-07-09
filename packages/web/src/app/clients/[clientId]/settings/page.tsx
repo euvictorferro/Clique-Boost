@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use, Suspense } from "react";
 import { TokenBadge } from "@/components/shared/TokenBadge";
-import { Save, Instagram, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
+import { Save, Instagram, CheckCircle, AlertCircle, RefreshCw, CreditCard, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 interface ClientData {
@@ -16,6 +16,97 @@ interface ClientData {
   contentGoal?: string;
   metaAccessToken?: string;
   metaTokenExpiresAt?: string;
+}
+
+const PAYMENT_LABELS: Record<string, { label: string; classes: string }> = {
+  pending: { label: "Pagamento pendente", classes: "bg-[#fef3c7] text-[#92400e] border-[#fcd34d]" },
+  proof_submitted: { label: "Comprovante enviado", classes: "bg-[#dbeafe] text-[#1e40af] border-[#93c5fd]" },
+  confirmed: { label: "Pagamento confirmado", classes: "bg-[#dcfce7] text-[#166534] border-[#86efac]" },
+  overdue: { label: "Pagamento atrasado", classes: "bg-[#fee2e2] text-[#991b1b] border-[#fca5a5]" },
+};
+
+function PaymentSection({ clientId }: { clientId: string }) {
+  const [status, setStatus] = useState<string | null>(null);
+  const [proofUrl, setProofUrl] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const load = () => {
+    fetch(`/api/clients/${clientId}/payment`)
+      .then((r) => r.json())
+      .then((data) => {
+        setStatus(data.paymentStatus ?? "pending");
+        setProofUrl(data.proofSignedUrl ?? null);
+      })
+      .catch(() => setStatus("pending"));
+  };
+
+  useEffect(load, [clientId]);
+
+  if (!status) return null;
+  const badge = PAYMENT_LABELS[status] ?? PAYMENT_LABELS.pending;
+
+  const act = async (action: "confirm" | "revert") => {
+    setBusy(true);
+    await fetch(`/api/clients/${clientId}/payment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action }),
+    });
+    setBusy(false);
+    load();
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-[#e5e5e5] p-5 mb-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <CreditCard size={15} className="text-[#8b5cf6]" />
+          <h3 className="text-sm font-semibold text-[#111]">Pagamento</h3>
+        </div>
+        <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full border ${badge.classes}`}>
+          {badge.label}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-3">
+        {proofUrl && (
+          <a
+            href={proofUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs text-[#555] border border-[#e5e5e5] px-3 py-1.5 rounded-lg hover:border-[#8b5cf6] hover:text-[#8b5cf6] transition-colors"
+          >
+            <ExternalLink size={12} />
+            Ver comprovante
+          </a>
+        )}
+        {status !== "confirmed" ? (
+          <button
+            onClick={() => act("confirm")}
+            disabled={busy}
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 bg-[#16a34a] text-white rounded-lg hover:bg-[#15803d] transition-colors disabled:opacity-50"
+          >
+            <CheckCircle size={12} />
+            Confirmar pagamento
+          </button>
+        ) : (
+          <button
+            onClick={() => act("revert")}
+            disabled={busy}
+            className="text-xs text-[#888] hover:text-[#991b1b] transition-colors"
+          >
+            Reverter para pendente
+          </button>
+        )}
+      </div>
+
+      {status !== "confirmed" && (
+        <p className="text-[11px] text-[#888] mt-3">
+          O pipeline automatizado (calendário, métricas, refresh semanal) só roda para clientes com pagamento confirmado.
+        </p>
+      )}
+    </div>
+  );
 }
 
 function SettingsContent({ clientId }: { clientId: string }) {
@@ -95,6 +186,9 @@ function SettingsContent({ clientId }: { clientId: string }) {
         <Field label="Tom de Voz" value={client.toneOfVoice ?? ""} onChange={(v) => setClient({ ...client, toneOfVoice: v })} />
         <Field label="Objetivo de Conteúdo" value={client.contentGoal ?? ""} onChange={(v) => setClient({ ...client, contentGoal: v })} />
       </div>
+
+      {/* Pagamento */}
+      <PaymentSection clientId={clientId} />
 
       {/* Instagram / Meta connection */}
       <div className="bg-white rounded-xl border border-[#e5e5e5] p-5 mb-4">

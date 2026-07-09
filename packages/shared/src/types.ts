@@ -2,6 +2,21 @@ export type Niche = 'life-insurance' | 'real-estate' | 'general';
 
 export type ClientStatus = 'onboarding' | 'active' | 'paused';
 
+export type PaymentStatus = 'pending' | 'proof_submitted' | 'confirmed' | 'overdue';
+
+export interface Plan {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  includesOrganic: boolean;
+  includesPaidAds: boolean;
+  includesVideo: boolean;
+  monthlyPrice?: number;
+  trackedMetrics: string[];
+  active: boolean;
+}
+
 export interface Client {
   id: string;
   name: string;
@@ -23,6 +38,10 @@ export interface Client {
   createdAt: string;
   status: ClientStatus;
   profilePictureUrl?: string;
+  planId?: string;
+  paymentStatus?: PaymentStatus;
+  paymentProofUrl?: string;
+  paymentConfirmedAt?: string;
 }
 
 export interface BriefingResponse {
