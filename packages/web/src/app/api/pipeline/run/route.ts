@@ -5,7 +5,7 @@ import { appendLog, updateLog } from "@/lib/api/pipelineLog";
 import { readClients } from "@/lib/api/clients";
 import { fetchClientInsights } from "@/lib/api/metaInsights";
 import { generateMonthlyCalendar } from "@/lib/api/contentCalendar";
-import { syncCalendarToTrello } from "@/lib/api/trello";
+import { syncCalendarToBoard } from "@/lib/api/kanban";
 import { runWeeklyAnalysis } from "@/lib/api/weeklyAnalysis";
 import { runWeeklyRefresh } from "@/lib/api/weeklyRefresh";
 import { generateWeekPosts } from "@/lib/api/postGenerator";
@@ -27,9 +27,15 @@ const JOB_LABELS: Record<string, string> = {
   "weekly-full": "Ciclo Semanal Completo (Análise + Refresh)",
 };
 
+// ─── Gate de pagamento ───────────────────────────────────────────────────────
+// Só clientes com pagamento confirmado entram no pipeline automatizado.
+async function readPaidClients() {
+  return (await readClients()).filter((c) => c.paymentStatus === "confirmed");
+}
+
 // ─── Métricas ────────────────────────────────────────────────────────────────
 async function runMetrics(clientId: string | undefined): Promise<void> {
-  const clients = (await readClients()).filter(
+  const clients = (await readPaidClients()).filter(
     (c) => c.metaAccessToken && (!clientId || c.id === clientId)
   );
 
@@ -72,7 +78,7 @@ async function runMetrics(clientId: string | undefined): Promise<void> {
 async function runCalendar(clientId: string | undefined): Promise<void> {
   const now = new Date();
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  const clients = (await readClients()).filter((c) => !clientId || c.id === clientId);
+  const clients = (await readPaidClients()).filter((c) => !clientId || c.id === clientId);
 
   for (const client of clients) {
     const startMs = Date.now();
@@ -87,12 +93,8 @@ async function runCalendar(clientId: string | undefined): Promise<void> {
     try {
       const calendar = await generateMonthlyCalendar(client, month);
 
-      // Sincroniza com Trello se o cliente tiver board
-      let trelloCount = 0;
-      if (client.trelloBoardId) {
-        await syncCalendarToTrello(client, calendar);
-        trelloCount = calendar.posts.length;
-      }
+      // Sincroniza com board nativo (substitui Trello)
+      const boardCount = await syncCalendarToBoard(client, calendar);
 
       await updateLog(entry.id, {
         status: "success",
@@ -101,7 +103,7 @@ async function runCalendar(clientId: string | undefined): Promise<void> {
         details: [
           { label: "Posts gerados", value: calendar.posts.length },
           { label: "Mês", value: month },
-          { label: "Trello", value: trelloCount > 0 ? `${trelloCount} cards criados` : "Board não configurado" },
+          { label: "Kanban", value: `${boardCount} cards criados no board nativo` },
           { label: "Obsidian", value: `Salvo em ${client.id}/Calendários/` },
         ],
       });
@@ -117,7 +119,7 @@ async function runCalendar(clientId: string | undefined): Promise<void> {
 
 // ─── Análise semanal ─────────────────────────────────────────────────────────
 async function runAnalysis(clientId: string | undefined): Promise<void> {
-  const clients = (await readClients()).filter(
+  const clients = (await readPaidClients()).filter(
     (c) => c.metaAccessToken && (!clientId || c.id === clientId)
   );
 
@@ -158,7 +160,7 @@ async function runAnalysis(clientId: string | undefined): Promise<void> {
 
 // ─── Refresh semanal ─────────────────────────────────────────────────────────
 async function runRefresh(clientId: string | undefined): Promise<void> {
-  const clients = (await readClients()).filter((c) => !clientId || c.id === clientId);
+  const clients = (await readPaidClients()).filter((c) => !clientId || c.id === clientId);
 
   for (const client of clients) {
     const startMs = Date.now();
@@ -199,7 +201,7 @@ async function runGeneratePosts(clientId: string | undefined, week?: number): Pr
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const nextWeekNum = week ?? Math.ceil((now.getDate() + 7) / 7);
   const dataDir = path.join(process.cwd(), "..", "..", "data");
-  const clients = (await readClients()).filter((c) => !clientId || c.id === clientId);
+  const clients = (await readPaidClients()).filter((c) => !clientId || c.id === clientId);
 
   for (const client of clients) {
     const startMs = Date.now();

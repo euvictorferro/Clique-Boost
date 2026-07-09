@@ -31,6 +31,7 @@ export interface Client {
   brandColors?: string;
   obsidianPath: string;
   trelloBoardId?: string;
+  boardId?: string;
   metaAccessToken?: string;
   metaTokenExpiresAt?: string;
   adAccountId?: string;
@@ -144,6 +145,49 @@ export interface InstagramPost {
   timestamp: string;
   caption?: string;
   type?: string;
+}
+
+export type CardStatus = 'draft' | 'pending' | 'approved' | 'published';
+export type CardFormat = 'Reel' | 'Carrossel' | 'Stories' | 'TikTok';
+
+export interface KanbanCard {
+  id: string;
+  columnId: string;
+  boardId: string;
+  position: number;
+  title: string;
+  week?: number;
+  day?: number;
+  date?: string;
+  theme?: string;
+  format?: CardFormat;
+  platforms: string[];
+  hook?: string;
+  caption?: string;
+  hashtags?: string;
+  objective?: string;
+  rationale?: string;
+  storiesIdea?: string;
+  notes?: string;
+  status: CardStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BoardColumn {
+  id: string;
+  boardId: string;
+  name: string;
+  position: number;
+  cards: KanbanCard[];
+}
+
+export interface Board {
+  id: string;
+  clientId: string;
+  name: string;
+  columns: BoardColumn[];
+  createdAt: string;
 }
 
 export interface MetaPost {

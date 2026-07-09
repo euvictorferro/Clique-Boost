@@ -2,7 +2,9 @@
 
 import { useEffect, useState, useCallback, use } from "react";
 import { CalendarView, Post } from "@/components/client/CalendarView";
-import { RefreshCw, Sparkles, ChevronDown } from "lucide-react";
+import { KanbanBoard } from "@/components/kanban/KanbanBoard";
+import { Board } from "@clique-boost/shared";
+import { RefreshCw, Sparkles, ChevronDown, Trello, Calendar } from "lucide-react";
 
 const AUTO_REFRESH_MS = 5 * 60 * 1000;
 
@@ -34,6 +36,11 @@ export default function CalendarPage({ params }: { params: Promise<{ clientId: s
   const [showGenerator, setShowGenerator] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
 
+  // Kanban
+  const [view, setView] = useState<"kanban" | "calendar">("kanban");
+  const [board, setBoard] = useState<Board | null>(null);
+  const [boardLoading, setBoardLoading] = useState(false);
+
   const fetchCalendar = useCallback(async (showSyncing = false) => {
     if (showSyncing) setSyncing(true);
     else setLoading(true);
@@ -56,6 +63,17 @@ export default function CalendarPage({ params }: { params: Promise<{ clientId: s
     } catch { setGenPosts([]); }
   }, [clientId, month]);
 
+  const fetchBoard = useCallback(async () => {
+    setBoardLoading(true);
+    try {
+      const res = await fetch(`/api/boards/${clientId}`);
+      if (res.ok) setBoard(await res.json());
+    } finally {
+      setBoardLoading(false);
+    }
+  }, [clientId]);
+
+  useEffect(() => { fetchBoard(); }, [fetchBoard]);
   useEffect(() => { fetchCalendar(); }, [fetchCalendar]);
 
   useEffect(() => {
@@ -104,32 +122,58 @@ export default function CalendarPage({ params }: { params: Promise<{ clientId: s
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-semibold text-[#111]">Calendário de Conteúdo</h2>
-          {sourceLabel && (
+          {view === "calendar" && sourceLabel && (
             <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#f5f5f5] text-[#888]">
               via {sourceLabel}
             </span>
           )}
         </div>
         <div className="flex items-center gap-2">
-          {lastSync && (
-            <span className="text-[10px] text-[#bbb]">
-              Atualizado às {lastSync.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-            </span>
+          {/* Toggle Kanban / Calendário */}
+          <div className="flex items-center bg-[#f5f5f5] rounded-lg p-0.5">
+            <button
+              onClick={() => setView("kanban")}
+              className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md transition-colors ${
+                view === "kanban" ? "bg-white shadow-sm text-[#8b5cf6] font-medium" : "text-[#888] hover:text-[#555]"
+              }`}
+            >
+              <Trello size={12} />
+              Kanban
+            </button>
+            <button
+              onClick={() => setView("calendar")}
+              className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md transition-colors ${
+                view === "calendar" ? "bg-white shadow-sm text-[#8b5cf6] font-medium" : "text-[#888] hover:text-[#555]"
+              }`}
+            >
+              <Calendar size={12} />
+              Calendário
+            </button>
+          </div>
+
+          {view === "calendar" && (
+            <>
+              {lastSync && (
+                <span className="text-[10px] text-[#bbb]">
+                  Atualizado às {lastSync.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+              )}
+              <input
+                type="month"
+                value={month}
+                onChange={(e) => setMonth(e.target.value)}
+                className="text-xs border border-[#e5e5e5] rounded-lg px-2 py-1.5 bg-white"
+              />
+              <button
+                onClick={() => fetchCalendar(true)}
+                disabled={syncing}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-white border border-[#e5e5e5] text-[#555] rounded-lg hover:border-[#8b5cf6] hover:text-[#8b5cf6] transition-colors disabled:opacity-50"
+              >
+                <RefreshCw size={12} className={syncing ? "animate-spin" : ""} />
+                {syncing ? "Sincronizando…" : "Sincronizar"}
+              </button>
+            </>
           )}
-          <input
-            type="month"
-            value={month}
-            onChange={(e) => setMonth(e.target.value)}
-            className="text-xs border border-[#e5e5e5] rounded-lg px-2 py-1.5 bg-white"
-          />
-          <button
-            onClick={() => fetchCalendar(true)}
-            disabled={syncing}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-white border border-[#e5e5e5] text-[#555] rounded-lg hover:border-[#8b5cf6] hover:text-[#8b5cf6] transition-colors disabled:opacity-50"
-          >
-            <RefreshCw size={12} className={syncing ? "animate-spin" : ""} />
-            {syncing ? "Sincronizando…" : "Sincronizar"}
-          </button>
         </div>
       </div>
 
@@ -205,15 +249,31 @@ export default function CalendarPage({ params }: { params: Promise<{ clientId: s
         )}
       </div>
 
-      {/* Trello / Obsidian calendar */}
-      {loading ? (
+      {/* Kanban nativo */}
+      {view === "kanban" && (
+        boardLoading ? (
+          <div className="flex items-center gap-2 text-sm text-[#888] py-8">
+            <div className="w-4 h-4 border-2 border-[#8b5cf6] border-t-transparent rounded-full animate-spin" />
+            Carregando board…
+          </div>
+        ) : board ? (
+          <KanbanBoard initialBoard={board} clientId={clientId} />
+        ) : (
+          <div className="bg-white rounded-xl border border-[#e5e5e5] p-8 text-center">
+            <p className="text-sm text-[#888]">Board não encontrado para este cliente.</p>
+          </div>
+        )
+      )}
+
+      {/* Calendário mensal */}
+      {view === "calendar" && (loading ? (
         <div className="flex items-center gap-2 text-sm text-[#888] py-8">
           <div className="w-4 h-4 border-2 border-[#8b5cf6] border-t-transparent rounded-full animate-spin" />
           Carregando calendário…
         </div>
       ) : hasTrelloPosts ? (
         <>
-          <p className="text-xs text-[#aaa] mb-3 font-medium uppercase tracking-wide">Calendário do Trello</p>
+          <p className="text-xs text-[#aaa] mb-3 font-medium uppercase tracking-wide">Calendário</p>
           <CalendarView
             posts={data?.posts}
             markdown={data?.content}
@@ -223,10 +283,10 @@ export default function CalendarPage({ params }: { params: Promise<{ clientId: s
         </>
       ) : (
         <div className="bg-white rounded-xl border border-[#e5e5e5] p-8 text-center">
-          <p className="text-sm text-[#888] mb-1">Nenhum conteúdo no Trello para {month}</p>
-          <p className="text-xs text-[#bbb]">Use o gerador acima para criar posts, ou adicione cards no Trello e clique em Sincronizar.</p>
+          <p className="text-sm text-[#888] mb-1">Nenhum conteúdo para {month}</p>
+          <p className="text-xs text-[#bbb]">Use o gerador acima para criar posts e sincronizar com o Kanban.</p>
         </div>
-      )}
+      ))}
     </div>
   );
 }
